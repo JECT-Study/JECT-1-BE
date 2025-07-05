@@ -3,6 +3,7 @@ package ject.mycode.domain.content.entity;
 import jakarta.persistence.*;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentTrait.entity.ContentTrait;
+import ject.mycode.domain.region.entity.Region;
 import ject.mycode.global.entity.BaseEntity;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 @Entity
-@Table(name = "\"content\"")
+@Table(name = "content")
 @Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -42,10 +43,8 @@ public class Content extends BaseEntity {
 
     private Boolean isAlwaysOpen;
 
-    @Column(nullable = false)
     private LocalTime openingHour;
 
-    @Column(nullable = false)
     private LocalTime closedHour;
 
     @Column(nullable = false)
@@ -60,4 +59,8 @@ public class Content extends BaseEntity {
 
     @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<ContentTrait> contentTraits;
+
+    @ManyToOne
+    @JoinColumn(name = "region_id")
+    private Region region;
 }

@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "\"region\"")
+@Table(name = "region")
 @Builder
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
