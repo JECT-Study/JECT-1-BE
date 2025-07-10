@@ -4,7 +4,9 @@ import ject.mycode.domain.auth.dto.KakaoUserInfoResponse;
 import ject.mycode.domain.auth.dto.TokenResponse;
 import ject.mycode.domain.auth.jwt.util.JwtTokenProvider;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.repository.UserRepository;
+import ject.mycode.global.util.NicknameGenerator;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,6 +14,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import ject.mycode.domain.user.enums.UserRole;
 
 @Service
 public class KakaoLoginServiceImpl implements KakaoLoginService{
@@ -31,11 +34,20 @@ public class KakaoLoginServiceImpl implements KakaoLoginService{
     public TokenResponse login(String kakaoAccessToken) {
         KakaoUserInfoResponse userInfo = getUserInfoFromKakao(kakaoAccessToken);
 
-        User user = userRepository.findByEmail(userInfo.getKakaoAccount().getEmail())
+        final String email = (userInfo.getKakaoAccount().getEmail() == null || userInfo.getKakaoAccount().getEmail().isBlank()) ?
+                "no-email-" + System.currentTimeMillis() + "@kakao.com" :
+                userInfo.getKakaoAccount().getEmail();
+
+        String nickname = NicknameGenerator.generate();
+
+        User user = userRepository.findByEmail(email)
                 .orElseGet(() -> userRepository.save(User.builder()
-                        .email(userInfo.getKakaoAccount().getEmail())
-                        .nickname(userInfo.getKakaoAccount().getProfile().getNickname())
+                        .email(email)
+                        .nickname(NicknameGenerator.generate())
                         .provider("KAKAO")
+                        .role(UserRole.NORMAL)
+                        .socialId(String.valueOf(userInfo.getId()))
+                        .socialType(SocialType.KAKAO)
                         .build()
                 ));
 
