@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import ject.mycode.domain.auth.jwt.userdetails.CustomUserDetails;
 import ject.mycode.domain.auth.jwt.util.JwtTokenProvider;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.repository.UserRepository;
@@ -12,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtTokenProvider jwtTokenProvider;
@@ -29,8 +29,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Long userId = jwtTokenProvider.getUserIdFromToken(token);
             User user = userRepository.findById(userId).orElseThrow();
+            CustomUserDetails userDetails = new CustomUserDetails(user);
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                    user, null, List.of());
+                    userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(auth);
         }
         chain.doFilter(request, response);

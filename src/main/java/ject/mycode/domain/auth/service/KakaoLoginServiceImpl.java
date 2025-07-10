@@ -43,7 +43,6 @@ public class KakaoLoginServiceImpl implements KakaoLoginService{
         String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
         String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
 
-
         return new TokenResponse(accessToken, refreshToken);
     }
 
