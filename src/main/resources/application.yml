@@ -15,3 +15,9 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+kakao:
+  rest-api-key: ${KAKAO_REST_API_KEY}
+
+jwt:
+  secret: ${JWT_SECRET}
