@@ -1,10 +1,12 @@
 package ject.mycode.domain.content.controller;
 
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ject.mycode.domain.content.dto.ContentDetailsRes;
 import ject.mycode.domain.content.service.ContentServiceImpl;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.response.BaseResponse;
@@ -20,5 +22,11 @@ public class ContentController{
 	@PostMapping("/contents/{contentId}/favorites")
 	public BaseResponse<Long> addFavorite(@AuthenticationPrincipal User user, @PathVariable Long contentId){
 		return new BaseResponse<>(BaseResponseCode.ADD_FAVORITE, contentServiceImpl.addFavorite(user, contentId));
+	}
+
+	@GetMapping("/contents/{contentId}")
+	public BaseResponse<ContentDetailsRes> getContentDetails(@PathVariable Long contentId){
+		return new BaseResponse<>(BaseResponseCode.GET_CONTENT_DETAILS,
+			contentServiceImpl.getContentDetails(contentId));
 	}
 }

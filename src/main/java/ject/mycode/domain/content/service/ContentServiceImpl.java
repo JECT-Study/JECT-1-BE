@@ -1,12 +1,19 @@
 package ject.mycode.domain.content.service;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import ject.mycode.domain.content.dto.ContentDetailsRes;
 import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.repository.ContentRepository;
+import ject.mycode.domain.content.repository.custom.ContentQueryRepositoryImpl;
+import ject.mycode.domain.contentImage.entity.ContentImage;
+import ject.mycode.domain.contentImage.repository.ContentImageRepository;
 import ject.mycode.domain.favorite.entity.Favorite;
 import ject.mycode.domain.favorite.repository.FavoriteRepository;
+import ject.mycode.domain.tag.repository.contentTagRepo.ContentTagRepository;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponseCode;
@@ -18,6 +25,9 @@ public class ContentServiceImpl implements ContentService {
 
 	private final ContentRepository contentRepository;
 	private final FavoriteRepository favoriteRepository;
+	private final ContentQueryRepositoryImpl contentQueryRepository;
+	private final ContentImageRepository contentImageRepository;
+	private final ContentTagRepository contentTagRepository;
 
 	@Override
 	@Transactional
@@ -31,5 +41,26 @@ public class ContentServiceImpl implements ContentService {
 			.build();
 
 		return favoriteRepository.save(favorite).getId();
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ContentDetailsRes getContentDetails(Long contentId) {
+		ContentDetailsRes findDetailsDto = contentQueryRepository.findDetailsById(contentId);
+
+		List<String> findImageList = contentImageRepository.findAllByContentId(contentId)
+			.stream()
+			.map(ContentImage::getImageUrl)
+			.toList();
+
+		List<String> findTagList = contentTagRepository.findAllByContentId(contentId)
+			.stream()
+			.map(ct -> ct.getTag().getName())
+			.toList();
+
+		findDetailsDto.setImages(findImageList);
+		findDetailsDto.setTags(findTagList);
+
+		return findDetailsDto;
 	}
 }
