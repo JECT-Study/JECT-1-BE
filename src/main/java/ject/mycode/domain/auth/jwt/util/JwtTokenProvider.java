@@ -16,7 +16,7 @@ public class JwtTokenProvider {
     private String secret;
 
     private final long accessTokenExpiration = 1000 * 60 * 60;     // 1시간
-    private final long refreshTokenExpiration = 1000L * 60 * 60 * 24 * 14; // 2주
+    private final long refreshTokenExpiration = 365L * 24 * 60 * 60 * 1000; // 1년
 
     public String generateAccessToken(Long userId) {
         return generateToken(userId, accessTokenExpiration);
