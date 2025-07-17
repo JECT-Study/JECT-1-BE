@@ -24,16 +24,19 @@ public class Content extends BaseEntity {
     private Long id;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String image;
+    @Column(nullable = false)
+    private String placeName;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String introduction;
 
     @Column(columnDefinition = "TEXT", nullable = false)
     private String description;
+
+    @Column(nullable = false)
+    private String address;
 
     @Column(nullable = false)
     private LocalDate startDate;

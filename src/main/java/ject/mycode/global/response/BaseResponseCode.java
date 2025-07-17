@@ -12,9 +12,10 @@ public enum BaseResponseCode {
 
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),
+	GET_CONTENT_DETAILS(true, 1101, "컨텐츠 상세페이지를 불러옵니다.", HttpStatus.OK),
 
 	// 1200 ~ 1299 : 일정 관련
-	ADD_SCHEDULE_SUCCESS(true,1200,"내 일정에 추가했습니다.", HttpStatus.CREATED),
+	ADD_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
 
 	// 2000번대 : 클라이언트 오류
 
@@ -23,13 +24,13 @@ public enum BaseResponseCode {
 
 	//2200 ~ 2299 : 일정 관련
 
-
 	VALIDATION_FAILED(false, 2999, "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 
 	// 3000번대 : 응답 오류
 
 	// 4000번대 : 서버 내부 오류;
-	INTERNAL_SERVER_ERROR(false, 4000, "서버 내부 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR);
+	INTERNAL_SERVER_ERROR(false, 4000, "서버 내부 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR),
+	;
 
 	private final Boolean status;
 	private final Integer code;
