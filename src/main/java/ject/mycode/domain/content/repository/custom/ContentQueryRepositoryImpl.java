@@ -18,6 +18,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
 import ject.mycode.domain.content.dto.FavoritesRes;
+import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.entity.QContent;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentImage.entity.QContentImage;
@@ -183,5 +184,18 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				.from(content)
 				.where(content.contentType.eq(contentType))
 				.fetch();
+  }
+  
+	@Override
+	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
+		return qf
+			.select(schedule.scheduleDate) // 바로 날짜만!
+			.from(schedule)
+			.where(
+				schedule.user.id.eq(userId),
+				schedule.scheduleDate.between(start, end)
+			)
+			.fetch();
 	}
+
 }
