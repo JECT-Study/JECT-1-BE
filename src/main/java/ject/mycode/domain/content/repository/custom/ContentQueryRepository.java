@@ -1,7 +1,9 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import ject.mycode.domain.content.dto.ContentRecommendRes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,4 +18,6 @@ public interface ContentQueryRepository {
 	Page<FavoritesRes> findFavoritesByUserId(Long userId, ContentType contentType, Pageable pageable);
 
 	Page<MySchedulesRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable);
+
+	List<ContentRecommendRes> findRecommendedContents(ContentType contentType);
 }
