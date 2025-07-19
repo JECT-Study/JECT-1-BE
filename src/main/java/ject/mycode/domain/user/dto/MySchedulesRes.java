@@ -1,4 +1,4 @@
-package ject.mycode.domain.content.dto;
+package ject.mycode.domain.user.dto;
 
 import java.time.LocalDate;
 
@@ -9,9 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class FavoritesRes {
+public class MySchedulesRes {
 	private Long contentId;
-	private Long likeId;
 	private String title;
 	private String image;
 	private String address;
