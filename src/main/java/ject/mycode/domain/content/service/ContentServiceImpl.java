@@ -46,7 +46,11 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	@Transactional(readOnly = true)
 	public ContentDetailsRes getContentDetails(Long contentId) {
-		ContentDetailsRes findDetailsDto = contentQueryRepository.findDetailsById(contentId);
+		ContentDetailsRes findDetailsDto = contentQueryRepository.findDetailsByContentId(contentId);
+
+		if(findDetailsDto == null) {
+			throw new CustomException(BaseResponseCode.CONTENT_NOT_EXIST);
+		}
 
 		List<String> findImageList = contentImageRepository.findAllByContentId(contentId)
 			.stream()
