@@ -24,4 +24,6 @@ public interface ContentQueryRepository {
 	List<HotContentRes> findHotContentsThisMonth(ContentType contentType);
 
 	List<WeeklyContentRes> findContentsByDate(LocalDate date);
+
+	List<ContentCategoryRes> findContentsByCategory(ContentType contentType);
 }
