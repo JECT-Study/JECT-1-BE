@@ -4,8 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
-import ject.mycode.domain.content.dto.ContentRecommendRes;
-import ject.mycode.domain.content.dto.HotContentRes;
+import ject.mycode.domain.content.dto.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,8 +16,6 @@ import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
-import ject.mycode.domain.content.dto.ContentDetailsRes;
-import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.entity.QContent;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentImage.entity.QContentImage;
@@ -226,6 +223,27 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				.where(content.contentType.eq(contentType)
 						.and(content.startDate.goe(firstDay))
 						.and(content.endDate.loe(lastDay)))
+				.fetch();
+	}
+
+	@Override
+	public List<WeeklyContentRes> findContentsByDate(LocalDate date) {
+
+		return qf
+				.select(Projections.constructor(
+						WeeklyContentRes.class,
+						content.id,
+						content.title,
+						contentImage.imageUrl.min(), // 최소 id에 해당하는 imageUrl
+						content.address,
+						content.startDate,
+						content.endDate
+				))
+				.from(content)
+				.leftJoin(contentImage).on(contentImage.content.eq(content))
+				.where(content.startDate.loe(date)
+						.and(content.endDate.goe(date)))
+				.groupBy(content.id, content.title, content.address, content.startDate, content.endDate)
 				.fetch();
 	}
 }
