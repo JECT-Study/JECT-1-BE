@@ -3,6 +3,7 @@ package ject.mycode.domain.content.service;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.ContentRecommendRes;
+import ject.mycode.domain.content.dto.HotContentRes;
 import ject.mycode.domain.content.enums.ContentType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,5 +74,10 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public List<ContentRecommendRes> getRecommendedContents(ContentType contentType) {
 		return contentQueryRepository.findRecommendedContents(contentType);
+	}
+
+	@Override
+	public List<HotContentRes> getHotContents(ContentType contentType) {
+		return contentQueryRepository.findHotContentsThisMonth(contentType);
 	}
 }

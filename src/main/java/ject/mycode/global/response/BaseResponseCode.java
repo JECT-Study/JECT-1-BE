@@ -14,6 +14,7 @@ public enum BaseResponseCode {
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),
 	GET_CONTENT_DETAILS(true, 1101, "컨텐츠 상세페이지를 불러옵니다.", HttpStatus.OK),
 	GET_RECOMMENDED_CONTENT(true, 1102, "맞춤 콘텐츠를 불러옵니다.", HttpStatus.OK),
+	GET_HOT_CONTENT(true, 1103, "핫한 콘텐츠를 불러옵니다.", HttpStatus.OK),
 
 	// 1200 ~ 1299 : 일정 관련
 	ADD_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
