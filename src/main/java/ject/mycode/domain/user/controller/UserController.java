@@ -1,6 +1,8 @@
 package ject.mycode.domain.user.controller;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -44,5 +46,13 @@ public class UserController {
 
 		Pageable pageable = PageRequest.of(page, limit);
 		return new BaseResponse<>(BaseResponseCode.GET_MY_SCHEDULES, userService.getMySchedules(user, day, pageable));
+	}
+
+	@GetMapping("/users/check/schedules")
+	public BaseResponse<List<LocalDate>> getScheduledDays(
+		@AuthenticationPrincipal User user,
+		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
+	) {
+		return new BaseResponse<>(BaseResponseCode.GET_SCHEDULED_DATES, userService.getDaysWithSchedules(user, month));
 	}
 }
