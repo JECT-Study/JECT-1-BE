@@ -1,6 +1,8 @@
 package ject.mycode.domain.user.service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,4 +16,6 @@ public interface UserService {
 	Page<FavoritesRes> getUserFavorites(User user, ContentType contentType, Pageable pageable);
 
 	Page<MySchedulesRes> getMySchedules(User user, LocalDate day, Pageable pageable);
+
+	List<LocalDate> getDaysWithSchedules(User user, YearMonth month);
 }
