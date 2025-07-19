@@ -1,0 +1,705 @@
+---
+openapi: 3.0.1
+info:
+  title: MyCode Map API
+  description: MyCode API 명세서
+  version: 1.0.0
+servers:
+- url: "/"
+security:
+- JWT TOKEN: []
+paths:
+  "/contents/{contentId}/schedules":
+    post:
+      tags:
+      - schedule-controller
+      operationId: addSchedule
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AddScheduleReq"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseLong"
+  "/contents/{contentId}/favorites":
+    post:
+      tags:
+      - content-controller
+      operationId: addFavorite
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseLong"
+  "/api/auth/kakao":
+    post:
+      tags:
+      - auth-controller
+      operationId: kakaoLogin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/AccessTokenRequest"
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/TokenResponse"
+  "/users/schedules":
+    get:
+      tags:
+      - user-controller
+      operationId: getMySchedules
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - name: day
+        in: query
+        required: true
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponsePageMySchedulesRes"
+  "/users/favorites":
+    get:
+      tags:
+      - user-controller
+      operationId: getUserFavorites
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 0
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          format: int32
+          default: 10
+      - name: contentType
+        in: query
+        required: false
+        schema:
+          type: string
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponsePageFavoritesRes"
+  "/users/check/schedules":
+    get:
+      tags:
+      - user-controller
+      operationId: getScheduledDays
+      parameters:
+      - name: month
+        in: query
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseListLocalDate"
+  "/home/recommendations":
+    get:
+      tags:
+      - home-controller
+      operationId: getRecommendedContents
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          default: PERFORMANCE
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseListContentRecommendRes"
+  "/home/festival/hot":
+    get:
+      tags:
+      - home-controller
+      operationId: getHotContents
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          default: PERFORMANCE
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseListHotContentRes"
+  "/home/contents/week":
+    get:
+      tags:
+      - home-controller
+      operationId: getWeeklyContents
+      parameters:
+      - name: date
+        in: query
+        required: false
+        schema:
+          type: string
+          format: date
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseListWeeklyContentRes"
+  "/home/category":
+    get:
+      tags:
+      - home-controller
+      operationId: getSameCategoryContents
+      parameters:
+      - name: category
+        in: query
+        required: false
+        schema:
+          type: string
+          default: PERFORMANCE
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseListContentCategoryRes"
+  "/contents/{contentId}":
+    get:
+      tags:
+      - content-controller
+      operationId: getContentDetails
+      parameters:
+      - name: contentId
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+      responses:
+        '200':
+          description: OK
+          content:
+            "*/*":
+              schema:
+                "$ref": "#/components/schemas/BaseResponseContentDetailsRes"
+components:
+  schemas:
+    AddScheduleReq:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+    BaseResponseLong:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: integer
+          format: int64
+    AccessTokenRequest:
+      type: object
+      properties:
+        accessToken:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+    BaseResponsePageMySchedulesRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          "$ref": "#/components/schemas/PageMySchedulesRes"
+    MySchedulesRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        address:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    PageMySchedulesRes:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            "$ref": "#/components/schemas/MySchedulesRes"
+        number:
+          type: integer
+          format: int32
+        sort:
+          "$ref": "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          "$ref": "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    PageableObject:
+      type: object
+      properties:
+        offset:
+          type: integer
+          format: int64
+        sort:
+          "$ref": "#/components/schemas/SortObject"
+        paged:
+          type: boolean
+        pageNumber:
+          type: integer
+          format: int32
+        pageSize:
+          type: integer
+          format: int32
+        unpaged:
+          type: boolean
+    SortObject:
+      type: object
+      properties:
+        empty:
+          type: boolean
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+    BaseResponsePageFavoritesRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          "$ref": "#/components/schemas/PageFavoritesRes"
+    FavoritesRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        likeId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        address:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    PageFavoritesRes:
+      type: object
+      properties:
+        totalElements:
+          type: integer
+          format: int64
+        totalPages:
+          type: integer
+          format: int32
+        size:
+          type: integer
+          format: int32
+        content:
+          type: array
+          items:
+            "$ref": "#/components/schemas/FavoritesRes"
+        number:
+          type: integer
+          format: int32
+        sort:
+          "$ref": "#/components/schemas/SortObject"
+        first:
+          type: boolean
+        last:
+          type: boolean
+        numberOfElements:
+          type: integer
+          format: int32
+        pageable:
+          "$ref": "#/components/schemas/PageableObject"
+        empty:
+          type: boolean
+    BaseResponseListLocalDate:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            type: string
+            format: date
+    BaseResponseListContentRecommendRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ContentRecommendRes"
+    ContentRecommendRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        contentType:
+          type: string
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+        address:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        startDate:
+          type: string
+        endDate:
+          type: string
+    BaseResponseListHotContentRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/HotContentRes"
+    HotContentRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        contentType:
+          type: string
+          enum:
+          - EXHIBITION
+          - PERFORMANCE
+          - FESTIVAL
+          - EVENT
+        address:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        startDate:
+          type: string
+        endDate:
+          type: string
+    BaseResponseListWeeklyContentRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/WeeklyContentRes"
+    WeeklyContentRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        address:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    BaseResponseListContentCategoryRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          type: array
+          items:
+            "$ref": "#/components/schemas/ContentCategoryRes"
+    ContentCategoryRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        image:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+    BaseResponseContentDetailsRes:
+      type: object
+      properties:
+        isSuccess:
+          type: boolean
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+        result:
+          "$ref": "#/components/schemas/ContentDetailsRes"
+    ContentDetailsRes:
+      type: object
+      properties:
+        contentId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
+        placeName:
+          type: string
+        startDate:
+          type: string
+          format: date
+        endDate:
+          type: string
+          format: date
+        likes:
+          type: integer
+          format: int64
+        openingHour:
+          "$ref": "#/components/schemas/LocalTime"
+        closedHour:
+          "$ref": "#/components/schemas/LocalTime"
+        address:
+          type: string
+        introduction:
+          type: string
+        description:
+          type: string
+        longitude:
+          type: number
+          format: double
+        latitude:
+          type: number
+          format: double
+        alwaysOpen:
+          type: boolean
+    LocalTime:
+      type: object
+      properties:
+        hour:
+          type: integer
+          format: int32
+        minute:
+          type: integer
+          format: int32
+        second:
+          type: integer
+          format: int32
+        nano:
+          type: integer
+          format: int32
+  securitySchemes:
+    JWT TOKEN:
+      type: http
+      name: JWT TOKEN
+      scheme: Bearer
+      bearerFormat: JWT
