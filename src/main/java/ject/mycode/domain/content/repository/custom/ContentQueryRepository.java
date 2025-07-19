@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
 import ject.mycode.domain.content.dto.FavoritesRes;
+import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.user.dto.MySchedulesRes;
 
@@ -20,4 +21,6 @@ public interface ContentQueryRepository {
 	Page<MySchedulesRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable);
 
 	List<ContentRecommendRes> findRecommendedContents(ContentType contentType);
+  
+	List<LocalDate> findContentsByUserIdAndDateRange(Long id, LocalDate start, LocalDate end);
 }

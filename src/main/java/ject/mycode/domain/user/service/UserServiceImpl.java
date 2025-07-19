@@ -1,6 +1,7 @@
 package ject.mycode.domain.user.service;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
@@ -32,7 +33,19 @@ public class UserServiceImpl implements UserService {
 	@Transactional(readOnly = true)
 	public Page<MySchedulesRes> getMySchedules(User user, LocalDate day, Pageable pageable) {
 
-		return contentQueryRepository.findMySchedulesByUserId(1L, day,
+		return contentQueryRepository.findMySchedulesByUserId(user.getId(), day,
 			pageable);
+	}
+
+	@Override
+	public List<LocalDate> getDaysWithSchedules(User user, YearMonth month) {
+		LocalDate start = month.atDay(1);              
+		LocalDate end = month.atEndOfMonth();
+
+		return contentQueryRepository.findContentsByUserIdAndDateRange(user.getId(), start, end)
+			.stream()
+			.distinct()
+			.sorted()
+			.toList();
 	}
 }
