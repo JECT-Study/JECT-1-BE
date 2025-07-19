@@ -19,6 +19,7 @@ public enum BaseResponseCode {
 
 	//1300 ~ 1399 : 마이페이지 관련
 	GET_FAVORITES(true, 1300, "관심목록을 불러옵니다.", HttpStatus.OK),
+	GET_MY_SCHEDULES(true, 1301, "나의 일정을 불러옵니다.", HttpStatus.OK),
 
 	// 2000번대 : 클라이언트 오류
 

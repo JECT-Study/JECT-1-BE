@@ -1,8 +1,11 @@
 package ject.mycode.domain.user.controller;
 
+import java.time.LocalDate;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -10,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
+import ject.mycode.domain.user.dto.MySchedulesRes;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.service.UserServiceImpl;
 import ject.mycode.global.response.BaseResponse;
@@ -30,5 +34,15 @@ public class UserController {
 		Pageable pageable = PageRequest.of(page, limit);
 		return new BaseResponse<>(BaseResponseCode.GET_FAVORITES,
 			userService.getUserFavorites(user, contentType, pageable));
+	}
+
+	@GetMapping("/users/schedules")
+	public BaseResponse<Page<MySchedulesRes>> getMySchedules(@AuthenticationPrincipal User user,
+		@RequestParam(defaultValue = "0") int page,
+		@RequestParam(defaultValue = "10") int limit,
+		@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
+
+		Pageable pageable = PageRequest.of(page, limit);
+		return new BaseResponse<>(BaseResponseCode.GET_MY_SCHEDULES, userService.getMySchedules(user, day, pageable));
 	}
 }

@@ -1,5 +1,6 @@
 package ject.mycode.domain.content.repository.custom;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -20,8 +21,10 @@ import ject.mycode.domain.content.entity.QContent;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentImage.entity.QContentImage;
 import ject.mycode.domain.favorite.entity.QFavorite;
+import ject.mycode.domain.schedule.entity.QSchedule;
 import ject.mycode.domain.tag.entity.QContentTag;
 import ject.mycode.domain.tag.entity.QTag;
+import ject.mycode.domain.user.dto.MySchedulesRes;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -34,6 +37,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QContentTag contentTag = QContentTag.contentTag;
 	private final QTag tag = QTag.tag;
 	private final QFavorite favorite = QFavorite.favorite;
+	private final QSchedule schedule = QSchedule.schedule;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(Long contentId) {
@@ -111,4 +115,47 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 		return new PageImpl<>(contents, pageable, total != null ? total : 0);
 	}
 
+	@Override
+	public Page<MySchedulesRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable) {
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(schedule.user.id.eq(userId));
+		builder.and(schedule.scheduleDate.eq(day));
+
+		QContentImage contentImageSub = new QContentImage("contentImageSub");
+
+		List<MySchedulesRes> schedules = qf
+			.select(Projections.constructor(
+				MySchedulesRes.class,
+				content.id,
+				content.title,
+				contentImage.imageUrl,
+				content.address,
+				content.startDate,
+				content.endDate
+			))
+			.from(schedule)
+			.join(schedule.content, content)
+			.leftJoin(contentImage).on(
+				contentImage.id.eq(
+					JPAExpressions
+						.select(contentImageSub.id.min())
+						.from(contentImageSub)
+						.where(contentImageSub.content.eq(content))
+				)
+			)
+			.where(builder)
+			.orderBy(content.startDate.asc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		Long total = qf
+			.select(content.count())
+			.from(schedule)
+			.join(schedule.content, content)
+			.where(builder)
+			.fetchOne();
+
+		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
+	}
 }
