@@ -3,15 +3,21 @@ package ject.mycode.domain.content.repository.custom;
 import java.util.Collections;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
+import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.entity.QContent;
+import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentImage.entity.QContentImage;
 import ject.mycode.domain.favorite.entity.QFavorite;
 import ject.mycode.domain.tag.entity.QContentTag;
@@ -30,7 +36,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QFavorite favorite = QFavorite.favorite;
 
 	@Override
-	public ContentDetailsRes findDetailsById(Long contentId) {
+	public ContentDetailsRes findDetailsByContentId(Long contentId) {
 		// TODO: 후에 날쿼리로 리팩토링
 		return qf.select(Projections.constructor(ContentDetailsRes.class,
 				content.id,
@@ -56,4 +62,53 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 			.where(content.id.eq(contentId))
 			.fetchOne();
 	}
+
+	@Override
+	public Page<FavoritesRes> findFavoritesByUserId(Long userId, ContentType contentType, Pageable pageable) {
+		BooleanBuilder builder = new BooleanBuilder();
+		builder.and(favorite.user.id.eq(userId));
+
+		if (contentType != null) {
+			builder.and(content.contentType.eq(contentType));
+		}
+
+		QContentImage contentImageSub = new QContentImage("contentImageSub");
+
+		List<FavoritesRes> contents = qf
+			.select(Projections.constructor(
+				FavoritesRes.class,
+				content.id,
+				favorite.id,
+				content.title,
+				contentImage.imageUrl,
+				content.address,
+				content.startDate,
+				content.endDate
+			))
+			.from(favorite)
+			.join(favorite.content, content)
+			.leftJoin(contentImage).on(
+				contentImage.id.eq(
+					JPAExpressions
+						.select(contentImageSub.id.min())
+						.from(contentImageSub)
+						.where(contentImageSub.content.eq(content))
+				)
+			)
+			.where(builder)
+			.orderBy(favorite.createdAt.desc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		Long total = qf
+			.select(favorite.count())
+			.from(favorite)
+			.join(favorite.content, content)
+			.where(builder)
+			.fetchOne();
+
+		return new PageImpl<>(contents, pageable, total != null ? total : 0);
+	}
+
 }

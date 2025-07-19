@@ -17,6 +17,9 @@ public enum BaseResponseCode {
 	// 1200 ~ 1299 : 일정 관련
 	ADD_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
 
+	//1300 ~ 1399 : 마이페이지 관련
+	GET_FAVORITES(true, 1300, "관심목록을 불러옵니다.", HttpStatus.OK),
+
 	// 2000번대 : 클라이언트 오류
 
 	// 2100 ~ 2199 : 컨텐츠 관련
