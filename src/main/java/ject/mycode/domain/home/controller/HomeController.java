@@ -1,6 +1,7 @@
 package ject.mycode.domain.home.controller;
 
 
+import ject.mycode.domain.content.dto.ContentCategoryRes;
 import ject.mycode.domain.content.dto.ContentRecommendRes;
 import ject.mycode.domain.content.dto.HotContentRes;
 import ject.mycode.domain.content.dto.WeeklyContentRes;
@@ -46,6 +47,14 @@ public class HomeController{
         LocalDate targetDate = (date != null) ? date : LocalDate.now();
         return new BaseResponse<>(BaseResponseCode.GET_WEEKLY_CONTENT,
                 contentService.getContentsByDate(targetDate));
+    }
+
+    @GetMapping("/category")
+    public BaseResponse<List<ContentCategoryRes>> getSameCategoryContents(
+            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
+    ) {
+        return new BaseResponse<>(BaseResponseCode.GET_SAME_CATEGORY_CONTENT,
+                contentService.getSameCategoryContents(contentType));
     }
 }
 

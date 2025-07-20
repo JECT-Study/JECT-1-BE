@@ -246,4 +246,31 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				.groupBy(content.id, content.title, content.address, content.startDate, content.endDate)
 				.fetch();
 	}
+
+	@Override
+	public List<ContentCategoryRes> findContentsByCategory(ContentType contentType) {
+		return qf
+				.select(Projections.constructor(
+						ContentCategoryRes.class,
+						content.id,
+						content.title,
+						contentImage.imageUrl.min(),
+						content.longitude,
+						content.latitude,
+						content.startDate,
+						content.endDate
+				))
+				.from(content)
+				.leftJoin(contentImage).on(contentImage.content.eq(content))
+				.where(content.contentType.eq(contentType))
+				.groupBy(
+						content.id,
+						content.title,
+						content.longitude,
+						content.latitude,
+						content.startDate,
+						content.endDate
+				)
+				.fetch();
+	}
 }

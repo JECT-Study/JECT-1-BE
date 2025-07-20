@@ -1,9 +1,6 @@
 package ject.mycode.domain.content.service;
 
-import ject.mycode.domain.content.dto.ContentDetailsRes;
-import ject.mycode.domain.content.dto.ContentRecommendRes;
-import ject.mycode.domain.content.dto.HotContentRes;
-import ject.mycode.domain.content.dto.WeeklyContentRes;
+import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.user.entity.User;
 
@@ -20,4 +17,6 @@ public interface ContentService {
 	List<HotContentRes> getHotContents(ContentType contentType);
 
 	List<WeeklyContentRes> getContentsByDate(LocalDate date);
+
+	List<ContentCategoryRes> getSameCategoryContents(ContentType contentType);
 }
