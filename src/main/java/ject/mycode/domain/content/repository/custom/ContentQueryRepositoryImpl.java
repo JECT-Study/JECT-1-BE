@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.ContentRecommendRes;
+import ject.mycode.domain.content.dto.HotContentRes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -18,7 +19,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
 import ject.mycode.domain.content.dto.FavoritesRes;
-import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.entity.QContent;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentImage.entity.QContentImage;
@@ -176,6 +176,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 								.orderBy(contentImageSub.id.asc())
 								.limit(1),
 						content.contentType,
+						content.address,
 						content.longitude,
 						content.latitude,
 						content.startDate.stringValue(),
@@ -198,4 +199,33 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 			.fetch();
 	}
 
+	@Override
+	public List<HotContentRes> findHotContentsThisMonth(ContentType contentType) {
+		LocalDate now = LocalDate.now();
+		LocalDate firstDay = now.withDayOfMonth(1);
+		LocalDate lastDay = now.withDayOfMonth(now.lengthOfMonth());
+
+		return qf.select(Projections.constructor(
+						HotContentRes.class,
+						content.id,
+						content.title,
+						JPAExpressions
+								.select(contentImageSub.imageUrl)
+								.from(contentImageSub)
+								.where(contentImageSub.content.eq(content))
+								.orderBy(contentImageSub.id.asc())
+								.limit(1),
+						content.contentType,
+						content.address,
+						content.longitude,
+						content.latitude,
+						content.startDate.stringValue(),
+						content.endDate.stringValue()
+				))
+				.from(content)
+				.where(content.contentType.eq(contentType)
+						.and(content.startDate.goe(firstDay))
+						.and(content.endDate.loe(lastDay)))
+				.fetch();
+	}
 }

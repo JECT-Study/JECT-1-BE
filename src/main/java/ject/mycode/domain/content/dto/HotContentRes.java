@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ContentRecommendRes {
+public class HotContentRes {
 
     private Long contentId;
     private String title;
@@ -22,4 +22,3 @@ public class ContentRecommendRes {
     private String startDate;
     private String endDate;
 }
-
