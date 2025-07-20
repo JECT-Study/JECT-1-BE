@@ -1,9 +1,11 @@
 package ject.mycode.domain.content.service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.ContentRecommendRes;
 import ject.mycode.domain.content.dto.HotContentRes;
+import ject.mycode.domain.content.dto.WeeklyContentRes;
 import ject.mycode.domain.content.enums.ContentType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -80,4 +82,11 @@ public class ContentServiceImpl implements ContentService {
 	public List<HotContentRes> getHotContents(ContentType contentType) {
 		return contentQueryRepository.findHotContentsThisMonth(contentType);
 	}
+
+
+	@Override
+	public List<WeeklyContentRes> getContentsByDate(LocalDate date) {
+		return contentQueryRepository.findContentsByDate(date);
+	}
+
 }
