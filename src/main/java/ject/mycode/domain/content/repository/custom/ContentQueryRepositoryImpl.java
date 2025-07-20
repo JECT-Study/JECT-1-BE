@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import ject.mycode.domain.content.dto.ContentRecommendRes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -35,6 +36,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final JPAQueryFactory qf;
 	private final QContent content = QContent.content;
 	private final QContentImage contentImage = QContentImage.contentImage;
+	QContentImage contentImageSub = new QContentImage("contentImageSub");
 	private final QContentTag contentTag = QContentTag.contentTag;
 	private final QTag tag = QTag.tag;
 	private final QFavorite favorite = QFavorite.favorite;
@@ -160,6 +162,30 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
 
+	@Override
+	public List<ContentRecommendRes> findRecommendedContents(ContentType contentType) {
+		return qf
+				.select(Projections.constructor(
+						ContentRecommendRes.class,
+						content.id,
+						content.title,
+						// 대표 이미지 url을 서브쿼리로 가져옴
+						JPAExpressions.select(contentImageSub.imageUrl)
+								.from(contentImageSub)
+								.where(contentImageSub.content.eq(content))
+								.orderBy(contentImageSub.id.asc())
+								.limit(1),
+						content.contentType,
+						content.longitude,
+						content.latitude,
+						content.startDate.stringValue(),
+						content.endDate.stringValue()
+				))
+				.from(content)
+				.where(content.contentType.eq(contentType))
+				.fetch();
+  }
+  
 	@Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
 		return qf

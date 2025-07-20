@@ -1,13 +1,7 @@
 package ject.mycode.domain.user.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.global.entity.BaseEntity;
@@ -50,4 +44,13 @@ public class User extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserRole role;
+
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "region_id")
+	private Region region;
+
+//	// 선호 콘텐츠 유형들
+//	@ElementCollection
+//	@Enumerated(EnumType.STRING)
+//	private List<ContentType> preferredContentTypes;
 }
