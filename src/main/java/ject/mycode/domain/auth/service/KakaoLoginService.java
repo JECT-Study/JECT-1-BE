@@ -1,9 +1,7 @@
 package ject.mycode.domain.auth.service;
 
-import ject.mycode.domain.auth.dto.KakaoUserInfoResponse;
-import ject.mycode.domain.auth.dto.TokenResponse;
+import ject.mycode.domain.auth.dto.TokenRes;
 
 public interface KakaoLoginService {
-    TokenResponse login(String kakaoAccessToken);
-    KakaoUserInfoResponse getUserInfoFromKakao(String accessToken);
+    TokenRes getAccessToken(String code);
 }
