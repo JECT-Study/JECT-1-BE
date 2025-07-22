@@ -16,7 +16,6 @@ import java.util.Base64;
 @RequiredArgsConstructor
 public class JwtTokenProvider {
     private static final String MEMBER_ID = "memberId";
-    private static final Long TOKEN_EXPIRATION_TIME = 24 * 60 * 60 * 1000L;
 
     @Value("${jwt.secret}")
     private String JWT_SECRET;
@@ -26,30 +25,6 @@ public class JwtTokenProvider {
         //base64 라이브러리에서 encodeToString을 이용해서 byte[] 형식을 String 형식으로 변환
         JWT_SECRET = Base64.getEncoder().encodeToString(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
     }
-
-//    public TokenRes generateToken(Authentication authentication) {
-//        final Date now = new Date();
-//
-//        final Claims claims = Jwts.claims()
-//                .setIssuedAt(now)
-//                .setExpiration(new Date(now.getTime() + TOKEN_EXPIRATION_TIME));  // 만료 시간 설정
-//
-//        claims.put(MEMBER_ID, authentication.getPrincipal());
-//
-//
-//        String accessToken = Jwts.builder()
-//                .setHeaderParam(Header.TYPE, Header.JWT_TYPE)
-//                .setClaims(claims)
-//                .signWith(getSigningKey())
-//                .compact();
-//
-//        String refreshToken = Jwts.builder()
-//                .setExpiration(new Date(now.getTime() + TOKEN_EXPIRATION_TIME * 2))
-//                .signWith(getSigningKey())
-//                .compact();
-//
-//        return new TokenRes(accessToken, refreshToken);
-//    }
 
     private SecretKey getSigningKey() {
         String encodedKey = Base64.getEncoder().encodeToString(JWT_SECRET.getBytes()); //SecretKey 통해 서명 생성
