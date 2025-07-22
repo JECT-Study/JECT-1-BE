@@ -1,58 +1,62 @@
 package ject.mycode.domain.auth.jwt.util;
 
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import ject.mycode.domain.auth.jwt.enums.JwtValidationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.util.Date;
+import java.util.Base64;
 
 @Component
 @RequiredArgsConstructor
 public class JwtTokenProvider {
+    private static final String MEMBER_ID = "memberId";
+
     @Value("${jwt.secret}")
-    private String secret;
+    private String JWT_SECRET;
 
-    private final long accessTokenExpiration = 365L * 24 * 60 * 60 * 1000;     // 1년
-    private final long refreshTokenExpiration = 365L * 24 * 60 * 60 * 1000; // 1년
-
-    public String generateAccessToken(Long userId) {
-        return generateToken(userId, accessTokenExpiration);
+    @PostConstruct
+    protected void init() {
+        //base64 라이브러리에서 encodeToString을 이용해서 byte[] 형식을 String 형식으로 변환
+        JWT_SECRET = Base64.getEncoder().encodeToString(JWT_SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateRefreshToken(Long userId) {
-        return generateToken(userId, refreshTokenExpiration);
+    private SecretKey getSigningKey() {
+        String encodedKey = Base64.getEncoder().encodeToString(JWT_SECRET.getBytes()); //SecretKey 통해 서명 생성
+        return Keys.hmacShaKeyFor(encodedKey.getBytes());   //일반적으로 HMAC (Hash-based Message Authentication Code) 알고리즘 사용
     }
 
-    private String generateToken(Long userId, long validity) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + validity);
-
-        return Jwts.builder()
-                .setSubject(String.valueOf(userId))
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)), SignatureAlgorithm.HS512)
-                .compact();
-    }
-
-    public boolean validateToken(String token) {
+    public JwtValidationType validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(secret.getBytes()).build().parseClaimsJws(token);
-            return true;
-        } catch (Exception e) {
-            return false;
+            final Claims claims = getBody(token);
+            return JwtValidationType.VALID_JWT;
+        } catch (MalformedJwtException ex) {
+            return JwtValidationType.INVALID_JWT_TOKEN;
+        } catch (ExpiredJwtException ex) {
+            return JwtValidationType.EXPIRED_JWT_TOKEN;
+        } catch (UnsupportedJwtException ex) {
+            return JwtValidationType.UNSUPPORTED_JWT_TOKEN;
+        } catch (IllegalArgumentException ex) {
+            return JwtValidationType.EMPTY_JWT;
         }
     }
 
-    public Long getUserIdFromToken(String token) {
-        return Long.valueOf(Jwts.parserBuilder()
-                .setSigningKey(secret.getBytes())
+    private Claims getBody(final String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getSubject());
+                .getBody();
+    }
+
+    public Long getUserFromJwt(String token) {
+        Claims claims = getBody(token);
+        return Long.valueOf(claims.get(MEMBER_ID).toString());
     }
 }
+

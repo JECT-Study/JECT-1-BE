@@ -1,74 +1,63 @@
 package ject.mycode.domain.auth.service;
 
-import ject.mycode.domain.auth.dto.KakaoUserInfoResponse;
-import ject.mycode.domain.auth.dto.TokenResponse;
+import ject.mycode.domain.auth.KakaoApiClient;
+import ject.mycode.domain.auth.dto.KakaoUserRes;
+import ject.mycode.domain.auth.dto.TokenRes;
 import ject.mycode.domain.auth.jwt.util.JwtTokenProvider;
-import ject.mycode.domain.user.entity.User;
-import ject.mycode.domain.user.enums.SocialType;
-import ject.mycode.domain.user.repository.UserRepository;
-import ject.mycode.global.util.NicknameGenerator;
+import ject.mycode.domain.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import ject.mycode.domain.user.enums.UserRole;
 
 @Service
-public class KakaoLoginServiceImpl implements KakaoLoginService{
-    private final RestTemplate restTemplate = new RestTemplate();
-    private final UserRepository userRepository;
+@RequiredArgsConstructor
+public class KakaoLoginServiceImpl implements KakaoLoginService {
+
+    private final KakaoApiClient kakaoApiClient;
     private final JwtTokenProvider jwtTokenProvider;
-    private final String kakaoUserInfoUrl = "https://kapi.kakao.com/v2/user/me";
+    private final UserService userService;
+    private final RestTemplate restTemplate = new RestTemplate();
 
-    @Value("${kakao.rest-api-key}")
-    private String kakaoRestApiKey;
+    @Value("${spring.security.oauth2.client.registration.kakao.client-id}")
+    private String clientId;  // REST API 키
 
-    public KakaoLoginServiceImpl(UserRepository userRepository, JwtTokenProvider jwtTokenProvider) {
-        this.userRepository = userRepository;
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    @Value("${spring.security.oauth2.client.registration.kakao.redirect-uri}")
+    private String redirectUri;
 
-    public TokenResponse login(String kakaoAccessToken) {
-        KakaoUserInfoResponse userInfo = getUserInfoFromKakao(kakaoAccessToken);
+    public TokenRes getAccessToken(String code) {
+        // 1. 인가 코드로 액세스 토큰 요청
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", clientId);
+        params.add("redirect_uri", redirectUri);
+        params.add("code", code);
 
-        final String email = (userInfo.getKakaoAccount().getEmail() == null || userInfo.getKakaoAccount().getEmail().isBlank()) ?
-                "no-email-" + System.currentTimeMillis() + "@kakao.com" :
-                userInfo.getKakaoAccount().getEmail();
-
-        String nickname = NicknameGenerator.generate();
-
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> userRepository.save(User.builder()
-                        .email(email)
-                        .nickname(NicknameGenerator.generate())
-                        .provider("KAKAO")
-                        .role(UserRole.NORMAL)
-                        .socialId(String.valueOf(userInfo.getId()))
-                        .socialType(SocialType.KAKAO)
-                        .build()
-                ));
-
-
-        String accessToken = jwtTokenProvider.generateAccessToken(user.getId());
-        String refreshToken = jwtTokenProvider.generateRefreshToken(user.getId());
-
-        return new TokenResponse(accessToken, refreshToken);
-    }
-
-    public KakaoUserInfoResponse getUserInfoFromKakao(String accessToken) {
         HttpHeaders headers = new HttpHeaders();
-        headers.setBearerAuth(accessToken);
-        HttpEntity<Void> entity = new HttpEntity<>(headers);
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        ResponseEntity<KakaoUserInfoResponse> response = restTemplate.exchange(
-                kakaoUserInfoUrl,
-                HttpMethod.GET,
-                entity,
-                KakaoUserInfoResponse.class
+        HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
+
+        ResponseEntity<TokenRes> response = restTemplate.postForEntity(
+                "https://kauth.kakao.com/oauth/token",
+                request,
+                TokenRes.class
         );
+
+
+        TokenRes tokenRes = response.getBody();
+
+        // 2. 토큰으로 사용자 정보 요청
+        KakaoUserRes kakaoUserRes = kakaoApiClient.getUserInformation("Bearer " + tokenRes.getAccessToken());
+
+        // 3. 사용자 정보 DB 저장
+        userService.saveUserIfNotExists(kakaoUserRes);
 
         return response.getBody();
     }

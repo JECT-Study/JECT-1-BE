@@ -1,13 +1,16 @@
 package ject.mycode.global.config;
 
 import ject.mycode.domain.auth.jwt.filter.JwtAuthenticationFilter;
-import ject.mycode.domain.auth.jwt.util.JwtTokenProvider;
-import ject.mycode.domain.user.repository.UserRepository;
+import ject.mycode.domain.auth.jwt.userdetails.CustomUserDetailsService;
+import ject.mycode.domain.auth.security.CustomAccessDeniedHandler;
+import ject.mycode.domain.auth.security.CustomJwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -15,8 +18,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider;
-    private final UserRepository userRepository;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final CustomJwtAuthenticationEntryPoint customJwtAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -26,16 +31,26 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/auth/login/kakao/**"
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/**").permitAll()
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(
-                        new JwtAuthenticationFilter(jwtTokenProvider, userRepository),
-                        UsernamePasswordAuthenticationFilter.class
-                );
+                .userDetailsService(customUserDetailsService)
+                .exceptionHandling(exception ->
+                {
+                    exception.authenticationEntryPoint(customJwtAuthenticationEntryPoint);
+                    exception.accessDeniedHandler(customAccessDeniedHandler);
+                })
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
 
         return http.build();
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }

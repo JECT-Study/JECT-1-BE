@@ -5,6 +5,6 @@ import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
-public class AccessTokenRequest {
+public class AccessTokenReq {
     private String accessToken;
 }
