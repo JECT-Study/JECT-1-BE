@@ -2,10 +2,8 @@ package ject.mycode.global.config;
 
 import ject.mycode.domain.auth.jwt.filter.JwtAuthenticationFilter;
 import ject.mycode.domain.auth.jwt.userdetails.CustomUserDetailsService;
-import ject.mycode.domain.auth.jwt.util.JwtTokenProvider;
 import ject.mycode.domain.auth.security.CustomAccessDeniedHandler;
 import ject.mycode.domain.auth.security.CustomJwtAuthenticationEntryPoint;
-import ject.mycode.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

@@ -2,18 +2,15 @@ package ject.mycode.domain.auth.jwt.util;
 
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
-import ject.mycode.domain.auth.dto.TokenRes;
 import ject.mycode.domain.auth.jwt.enums.JwtValidationType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.*;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
-import java.util.Date;
 
 @Component
 @RequiredArgsConstructor
