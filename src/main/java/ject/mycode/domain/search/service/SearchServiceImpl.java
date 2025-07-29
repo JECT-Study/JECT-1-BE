@@ -108,4 +108,16 @@ public class SearchServiceImpl implements SearchService {
 
         searchRepository.delete(searchKeyword);
     }
+
+    @Transactional
+    public void deleteAllKeywords(User user) {
+        // 로그인 기능 완성되면 삭제될 예정
+        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
+
+        List<SearchKeyword> keywords = searchRepository.findAllByUserId(userIdToSave);
+        if (keywords.isEmpty()) {
+            throw new CustomException(BaseResponseCode.SEARCH_KEYWORD_NOT_FOUND);
+        }
+        searchRepository.deleteAll(keywords);
+    }
 }

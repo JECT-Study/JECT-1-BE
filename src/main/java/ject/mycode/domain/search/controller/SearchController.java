@@ -38,7 +38,7 @@ public class SearchController {
     @GetMapping("/recent")
     public BaseResponse<List<String>> getRecentSearches(@AuthenticationPrincipal User user) {
         List<String> recentKeywords = searchService.getRecentSearchKeywords(user);
-        return new BaseResponse<>(BaseResponseCode.SEARCH_SUCCESS, recentKeywords);
+        return new BaseResponse<>(BaseResponseCode.RECENT_SEARCH_SUCCESS, recentKeywords);
     }
 
     @DeleteMapping("/keywords/{keyword}")
@@ -46,5 +46,15 @@ public class SearchController {
                                             @PathVariable String keyword) {
         searchService.deleteKeyword(user, keyword);
         return new BaseResponse<>(BaseResponseCode.DELETE_SUCCESS);
+    }
+
+    @DeleteMapping("/keywords")
+    public BaseResponse<?> deleteAllKeywords(@AuthenticationPrincipal User user) {
+//        if (user == null) {
+//            throw new CustomException(BaseResponseCode.USER_NOT_AUTHENTICATED);
+//        }
+
+        searchService.deleteAllKeywords(user);
+        return new BaseResponse<>(BaseResponseCode.DELETE_ALL_SUCCESS);
     }
 }

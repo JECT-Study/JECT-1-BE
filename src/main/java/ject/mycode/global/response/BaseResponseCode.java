@@ -38,7 +38,9 @@ public enum BaseResponseCode {
 
 	// 2300~2399 : 검색 관련
 	SEARCH_SUCCESS(true, 2300, "컨텐츠를 검색합니다.", HttpStatus.OK),
-	DELETE_SUCCESS(true, 2301,"최근 검색어가 삭제되었습니다.", HttpStatus.OK),
+	RECENT_SEARCH_SUCCESS(true, 2301, "최근 검색어 목록을 조회합니다.", HttpStatus.OK),
+	DELETE_SUCCESS(true, 2302,"최근 검색어가 삭제되었습니다.", HttpStatus.OK),
+	DELETE_ALL_SUCCESS(true, 2303,"최근 검색어가 모두 삭제되었습니다.", HttpStatus.OK),
 
 	SEARCH_KEYWORD_MISSING(false, 2311, "검색어를 입력해 주세요.",  HttpStatus.NOT_FOUND),
 	SEARCH_KEYWORD_NOT_FOUND(false, 2312, "검색어를 찾을 수 없습니다.",  HttpStatus.NOT_FOUND),
