@@ -7,10 +7,7 @@ import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -42,5 +39,12 @@ public class SearchController {
     public BaseResponse<List<String>> getRecentSearches(@AuthenticationPrincipal User user) {
         List<String> recentKeywords = searchService.getRecentSearchKeywords(user);
         return new BaseResponse<>(BaseResponseCode.SEARCH_SUCCESS, recentKeywords);
+    }
+
+    @DeleteMapping("/keywords/{keyword}")
+    public BaseResponse<Void> deleteKeyword(@AuthenticationPrincipal User user,
+                                            @PathVariable String keyword) {
+        searchService.deleteKeyword(user, keyword);
+        return new BaseResponse<>(BaseResponseCode.DELETE_SUCCESS);
     }
 }

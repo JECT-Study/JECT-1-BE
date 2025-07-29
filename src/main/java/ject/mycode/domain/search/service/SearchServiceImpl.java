@@ -10,8 +10,12 @@ import ject.mycode.domain.search.repository.custom.SearchQueryRepository;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.search.entity.SearchKeyword;
 import ject.mycode.domain.user.repository.UserRepository;
+import ject.mycode.global.exception.CustomException;
+import ject.mycode.global.response.BaseResponse;
+import ject.mycode.global.response.BaseResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -90,5 +94,18 @@ public class SearchServiceImpl implements SearchService {
                 .stream()
                 .map(SearchKeyword::getKeyword)
                 .toList();
+    }
+
+
+    @Transactional
+    public void deleteKeyword(User user, String keyword) {
+        // 로그인 기능 완성되면 삭제될 예정
+        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
+
+        SearchKeyword searchKeyword = searchRepository
+                .findByUserIdAndKeyword(userIdToSave, keyword)
+                .orElseThrow(() -> new CustomException(BaseResponseCode.SEARCH_KEYWORD_NOT_FOUND));
+
+        searchRepository.delete(searchKeyword);
     }
 }
