@@ -36,6 +36,11 @@ public enum BaseResponseCode {
 
 	VALIDATION_FAILED(false, 2999, "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 
+	// 2300~2399 : 검색 관련
+	SEARCH_SUCCESS(true, 2300, "컨텐츠를 검색합니다.", HttpStatus.OK),
+	SEARCH_KEYWORD_MISSING(false, 2399, "검색어를 입력해 주세요.",  HttpStatus.NOT_FOUND),
+
+
 	// 3000번대 : 응답 오류
 
 	// 4000번대 : 서버 내부 오류;
