@@ -9,6 +9,7 @@ import ject.mycode.domain.search.repository.SearchRepository;
 import ject.mycode.domain.search.repository.custom.SearchQueryRepository;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.search.entity.SearchKeyword;
+import ject.mycode.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class SearchServiceImpl implements SearchService {
     private final ContentImageQueryRepository contentImageQueryRepository;
     private final ContentRepository contentRepository;
     private final SearchRepository searchRepository;
+    private final UserRepository userRepository;
 
     @Override
     public SearchContentsRes searchContents(String keyword, int page, int limit, String sort, User user) {
@@ -32,10 +34,13 @@ public class SearchServiceImpl implements SearchService {
         // 로그인 기능 완성되면 삭제될 예정
         Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
 
+        User userToSave = userRepository.findById(userIdToSave)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
+
         // 검색어 저장 (사용자 검색 기록 저장)
         searchRepository.save(
                 SearchKeyword.builder()
-                        .userId(userIdToSave)
+                        .user(userToSave)
                         .keyword(keyword)
                         .searchedAt(LocalDateTime.now())
                         .build()
