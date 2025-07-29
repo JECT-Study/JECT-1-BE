@@ -7,4 +7,5 @@ import java.util.List;
 public interface SearchQueryRepository {
     List<Content> findContentsByKeyword(String keyword, int limit, int offset, String sort);
     int countContentsByKeyword(String keyword);
+    List<String> findTop10PopularKeywords();
 }

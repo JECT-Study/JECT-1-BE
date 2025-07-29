@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -41,15 +42,24 @@ public class SearchServiceImpl implements SearchService {
         User userToSave = userRepository.findById(userIdToSave)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
 
-        // 검색어 저장 (사용자 검색 기록 저장)
-        searchRepository.save(
-                SearchKeyword.builder()
-                        .user(userToSave)
-                        .keyword(keyword)
-                        .searchedAt(LocalDateTime.now())
-                        .build()
-        );
 
+        Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(userIdToSave, keyword);
+
+        if (existingKeyword.isPresent()) {
+            // 기존 검색어가 있으면 searchedAt만 업데이트
+            SearchKeyword keywordEntity = existingKeyword.get();
+            keywordEntity.setSearchedAt(LocalDateTime.now());
+            searchRepository.save(keywordEntity);
+        } else {
+            // 없으면 새로 저장
+            searchRepository.save(
+                    SearchKeyword.builder()
+                            .user(userToSave)
+                            .keyword(keyword)
+                            .searchedAt(LocalDateTime.now())
+                            .build()
+            );
+        }
         // 검색 결과 조회
         List<Content> contentList = searchQueryRepository.findContentsByKeyword(keyword, limit, offset, sort);
 
@@ -119,5 +129,10 @@ public class SearchServiceImpl implements SearchService {
             throw new CustomException(BaseResponseCode.SEARCH_KEYWORD_NOT_FOUND);
         }
         searchRepository.deleteAll(keywords);
+    }
+
+
+    public List<String> getPopularKeywords() {
+        return searchQueryRepository.findTop10PopularKeywords();
     }
 }

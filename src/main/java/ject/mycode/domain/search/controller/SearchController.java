@@ -57,4 +57,10 @@ public class SearchController {
         searchService.deleteAllKeywords(user);
         return new BaseResponse<>(BaseResponseCode.DELETE_ALL_SUCCESS);
     }
+
+    @GetMapping("/popular")
+    public BaseResponse<List<String>> getPopularKeywords() {
+        List<String> popularKeywords = searchService.getPopularKeywords();
+        return new BaseResponse<>(BaseResponseCode.POPULAR_KEYWORD_SUCCESS, popularKeywords);
+    }
 }

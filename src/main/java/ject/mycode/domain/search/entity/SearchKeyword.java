@@ -29,8 +29,7 @@ public class SearchKeyword extends BaseEntity {
 
     private LocalDateTime searchedAt;
 
-    public SearchKeyword(User user, String keyword) {
-        this.user = user;
-        this.keyword = keyword;
+    public void setSearchedAt(LocalDateTime now) {
+        this.searchedAt = now;
     }
 }

@@ -10,5 +10,6 @@ public interface SearchService {
     List<String> getRecentSearchKeywords(User user);
     void deleteKeyword(User user, String keyword);
     void deleteAllKeywords(User user);
+    List<String> getPopularKeywords();
 }
 
