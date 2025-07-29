@@ -70,4 +70,9 @@ public class Content extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "region_id")
     private Region region;
+
+    public void setViews(int views) {
+        this.views = views;
+    }
+
 }
