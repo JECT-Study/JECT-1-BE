@@ -1,6 +1,8 @@
 package ject.mycode.domain.search.controller;
 
+import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.search.dto.SearchContentsRes;
+import ject.mycode.domain.search.dto.SearchResultRes;
 import ject.mycode.domain.search.service.SearchService;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.response.BaseResponse;
@@ -62,5 +64,17 @@ public class SearchController {
     public BaseResponse<List<String>> getPopularKeywords() {
         List<String> popularKeywords = searchService.getPopularKeywords();
         return new BaseResponse<>(BaseResponseCode.POPULAR_KEYWORD_SUCCESS, popularKeywords);
+    }
+
+    @GetMapping("/results")
+    public BaseResponse<SearchResultRes> searchContents(
+            @RequestParam String keyword,
+            @RequestParam(required = false) ContentType category,
+            @RequestParam(required = false) String region,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        SearchResultRes result = searchService.getSearchResults(keyword, category, region, page, size);
+        return new BaseResponse<>(BaseResponseCode.SEARCH_RESULT_SUCCESS, result);
     }
 }

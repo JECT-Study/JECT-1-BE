@@ -1,12 +1,17 @@
 package ject.mycode.domain.search.repository.custom;
 
+import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.entity.QContent;
+import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.search.entity.QSearchKeyword;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -64,5 +69,36 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
                 .orderBy(searchKeyword.keyword.count().desc())
                 .limit(10)
                 .fetch();
+    }
+
+    @Override
+    public Page<Content> getSearchResults(String keyword, ContentType category, String region, Pageable pageable)  {
+
+        BooleanBuilder builder = new BooleanBuilder();
+
+        if (keyword != null && !keyword.isBlank()) {
+            builder.and(content.title.containsIgnoreCase(keyword)
+                    .or(content.address.containsIgnoreCase(keyword)));
+        }
+        if (category != null) {
+            builder.and(content.contentType.eq(category));
+        }
+        if (region != null && !region.isBlank()) {
+            builder.and(content.address.containsIgnoreCase(region));
+        }
+
+        List<Content> results = queryFactory
+                .selectFrom(content)
+                .where(builder)
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
+
+        long total = queryFactory
+                .selectFrom(content)
+                .where(builder)
+                .fetchCount();
+
+        return new PageImpl<>(results, pageable, total);
     }
 }

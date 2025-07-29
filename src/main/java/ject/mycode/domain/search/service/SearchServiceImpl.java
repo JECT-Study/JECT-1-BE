@@ -1,10 +1,10 @@
 package ject.mycode.domain.search.service;
 
 import ject.mycode.domain.content.entity.Content;
+import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.content.repository.ContentRepository;
 import ject.mycode.domain.contentImage.repository.custom.ContentImageQueryRepository;
-import ject.mycode.domain.search.dto.ContentSummary;
-import ject.mycode.domain.search.dto.SearchContentsRes;
+import ject.mycode.domain.search.dto.*;
 import ject.mycode.domain.search.repository.SearchRepository;
 import ject.mycode.domain.search.repository.custom.SearchQueryRepository;
 import ject.mycode.domain.user.entity.User;
@@ -14,6 +14,9 @@ import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,8 +134,37 @@ public class SearchServiceImpl implements SearchService {
         searchRepository.deleteAll(keywords);
     }
 
-
     public List<String> getPopularKeywords() {
         return searchQueryRepository.findTop10PopularKeywords();
+    }
+
+    public SearchResultRes getSearchResults(String keyword, ContentType category, String region, int page, int size) {
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        Page<Content> contentPage = searchQueryRepository.getSearchResults(keyword, category, region, pageable);
+
+        List<Content> contentList = contentPage.getContent();
+        // 썸네일 map 조회
+        Map<Long, String> thumbnailMap = contentImageQueryRepository.findThumbnailUrlsByContentIds(
+                contentList.stream().map(Content::getId).toList()
+        );
+
+        List<ContentResultRes> dtos = contentPage.getContent().stream()
+                .map(c -> new ContentResultRes(
+                        c.getId(),
+                        c.getTitle(),
+                        c.getContentType(),
+                        c.getAddress(),
+                        thumbnailMap.get(c.getId())
+                ))
+                .toList();
+
+        PageInfoRes pageInfo = new PageInfoRes(
+                page,
+                contentPage.getTotalPages(),
+                contentPage.getTotalElements());
+
+        return new SearchResultRes(dtos, pageInfo);
     }
 }
