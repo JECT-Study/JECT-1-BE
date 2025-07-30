@@ -9,7 +9,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BaseResponseCode {
 	// 1000번대 : 성공코드
-	LOGIN_SUCCESS(true, 1000, "카카오 로그인 성공", HttpStatus.OK),
+	LOGIN_SUCCESS(true, 1000, "로그인 성공", HttpStatus.OK),
 
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),

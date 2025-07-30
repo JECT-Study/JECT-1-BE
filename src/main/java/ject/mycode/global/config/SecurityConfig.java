@@ -1,9 +1,5 @@
 package ject.mycode.global.config;
 
-import ject.mycode.domain.auth.jwt.filter.JwtAuthenticationFilter;
-import ject.mycode.domain.auth.jwt.userdetails.CustomUserDetailsService;
-import ject.mycode.domain.auth.security.CustomAccessDeniedHandler;
-import ject.mycode.domain.auth.security.CustomJwtAuthenticationEntryPoint;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,10 +14,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
-    private final CustomJwtAuthenticationEntryPoint customJwtAuthenticationEntryPoint;
-    private final CustomAccessDeniedHandler customAccessDeniedHandler;
-    private final CustomUserDetailsService customUserDetailsService;
+//    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+//    private final CustomJwtAuthenticationEntryPoint customJwtAuthenticationEntryPoint;
+//    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+//    private final CustomUserDetailsService customUserDetailsService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -36,14 +32,14 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/**").permitAll()
                         .anyRequest().authenticated()
-                )
-                .userDetailsService(customUserDetailsService)
-                .exceptionHandling(exception ->
-                {
-                    exception.authenticationEntryPoint(customJwtAuthenticationEntryPoint);
-                    exception.accessDeniedHandler(customAccessDeniedHandler);
-                })
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                );
+//                .userDetailsService(customUserDetailsService)
+//                .exceptionHandling(exception ->
+//                {
+//                    exception.authenticationEntryPoint(customJwtAuthenticationEntryPoint);
+//                    exception.accessDeniedHandler(customAccessDeniedHandler);
+//                })
+//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
 
         return http.build();
