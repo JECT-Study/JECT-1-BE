@@ -58,6 +58,10 @@ public class UserConverter {
                 .nickname(NicknameGenerator.generate())
                 .email(kakaoUserInfo.getKakao_account().getEmail())
                 .socialType(SocialType.KAKAO)
+                .role(UserRole.NORMAL)
+                .socialId(null)
+                .image(null)
+                .region(null)
                 .build();
     }
 }
