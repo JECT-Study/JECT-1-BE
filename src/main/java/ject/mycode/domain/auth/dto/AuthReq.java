@@ -57,17 +57,9 @@ public class AuthReq {
         Long id;
     }
 
-//    @Getter
-//    public static class VerifyEmailDTO {
-//        @NotNull
-//        String email;
-//    }
-//
-//    @Getter
-//    public static class VerifyCodeDTO {
-//        @NotNull
-//        String code;
-//        @NotNull
-//        String email;
-//    }
+    @Getter
+    public static class SocialLoginDTO {
+        @NotNull
+        String code;
+    }
 }

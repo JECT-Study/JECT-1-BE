@@ -2,9 +2,11 @@ package ject.mycode.domain.user.converter;
 
 import ject.mycode.domain.auth.dto.AuthReq;
 import ject.mycode.domain.auth.dto.AuthRes;
+import ject.mycode.domain.auth.dto.KakaoUserRes;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
+import ject.mycode.global.util.NicknameGenerator;
 
 import java.time.LocalDateTime;
 
@@ -50,9 +52,12 @@ public class UserConverter {
                 .build();
     }
 
-//    public static AuthResponseDTO.VerifyCodeResultDTO toVerifyCodeResultDTO(boolean isVerified) {
-//        return AuthResponseDTO.VerifyCodeResultDTO.builder()
-//                .isVerified(isVerified)
-//                .build();
-//    }
+    public static User toKakaoUser(KakaoUserRes kakaoUserInfo) {
+        return User.builder()
+                //.name(kakaoUserInfo.getKakao_account().getName())
+                .nickname(NicknameGenerator.generate())
+                .email(kakaoUserInfo.getKakao_account().getEmail())
+                .socialType(SocialType.KAKAO)
+                .build();
+    }
 }

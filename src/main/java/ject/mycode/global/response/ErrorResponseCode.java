@@ -26,6 +26,7 @@ public enum ErrorResponseCode {
     PASSWORD_NOT_EQUAL(false, 2400, "비밀번호가 일치하지 않습니다.", HttpStatus.BAD_REQUEST),
     TOKEN_LOGGED_OUT(false, 2401, "로그아웃된 토큰입니다.", HttpStatus.UNAUTHORIZED),
     USER_NOT_FOUND(false, 2402, "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
+    UNSUPPORTED_PROVIDER(false, 2403, "지원하지 않는 소셜 provider입니다", HttpStatus.BAD_REQUEST),
 
     // 4000번대 : 서버 내부 오류;
     INTERNAL_SERVER_ERROR(false, 4000, "서버 내부 오류입니다.", HttpStatus.INTERNAL_SERVER_ERROR),// 예: 인증 관련 에러 코드가 있는 enum에 추가
@@ -34,7 +35,6 @@ public enum ErrorResponseCode {
     UNAUTHORIZED(false, 4010, "인증이 필요합니다.", HttpStatus.UNAUTHORIZED),
     TOKEN_EXPIRED(false, 4011, "토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
     ;
-
 
     private final Boolean status;
     private final Integer code;
