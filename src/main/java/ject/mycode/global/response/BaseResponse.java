@@ -44,4 +44,18 @@ public class BaseResponse<T> {
 	public T getResult() {
 		return result;
 	}
+
+	public BaseResponse(ErrorResponseCode responseCode) {
+		this.isSuccess = responseCode.getStatus();
+		this.message = responseCode.getMessage();
+		this.code = responseCode.getCode();
+		this.result = null;
+	}
+
+	public BaseResponse(ErrorResponseCode responseCode, T result) {
+		this.isSuccess = responseCode.getStatus();
+		this.message = responseCode.getMessage();
+		this.code = responseCode.getCode();
+		this.result = result;
+	}
 }

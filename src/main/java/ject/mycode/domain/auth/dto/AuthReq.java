@@ -38,6 +38,14 @@ public class AuthReq {
     }
 
     @Getter
+    public static class LoginDTO {
+        @NotNull
+        String userId;
+        @NotNull
+        String password;
+    }
+
+    @Getter
     public static class CheckNicknameDTO {
         @NotNull
         String nickname;

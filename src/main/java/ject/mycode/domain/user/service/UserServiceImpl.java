@@ -10,6 +10,8 @@ import java.util.Optional;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.repository.UserRepository;
+import ject.mycode.global.exception.AuthHandler;
+import ject.mycode.global.response.ErrorResponseCode;
 import ject.mycode.global.util.NicknameGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -55,6 +57,11 @@ public class UserServiceImpl implements UserService {
 			.distinct()
 			.sorted()
 			.toList();
+	}
+
+	@Override
+	public User getUserByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
 	}
 
 //	@Transactional

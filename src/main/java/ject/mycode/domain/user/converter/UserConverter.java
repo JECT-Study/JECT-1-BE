@@ -13,6 +13,7 @@ public class UserConverter {
         return User.builder()
                 .nickname(request.getNickname())
                 .email(request.getEmail())
+                .password(request.getPassword())
                 .socialId("temp")
                 .socialType(SocialType.NONE)
                 .image(null)
@@ -26,6 +27,15 @@ public class UserConverter {
                 .id(user.getId())
                 .createdAt(LocalDateTime.now())
                 .build();
+    }
+
+    public static AuthRes.LoginResultDTO toLoginResultDTO(User user, String accessToken, String refreshToken) {
+        return AuthRes.LoginResultDTO.builder()
+                .id(user.getId())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+
     }
 
     public static AuthRes.CheckNicknameResultDTO toCheckNicknameResultDTO(boolean isDuplicated) {

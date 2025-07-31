@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  redis_mycode:  # 서비스 이름
+    image: redis:latest
+    container_name: redis_mycode  # 실제 컨테이너 이름
+    ports:
+      - "6379:6379"

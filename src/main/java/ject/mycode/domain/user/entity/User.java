@@ -23,6 +23,9 @@ public class User extends BaseEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	// 추후 삭제 예정
+	private String password;
+
 	@Column(nullable = false)
 	private String socialId;
 
@@ -49,7 +52,7 @@ public class User extends BaseEntity {
 	@JoinColumn(name = "region_id")
 	private Region region;
 
-//	public void encodePassword(String password) {
-//		this.password = password;
-//	}
+	public void encodePassword(String password) {
+		this.password = password;
+	}
 }

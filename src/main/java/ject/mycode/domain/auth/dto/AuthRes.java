@@ -1,5 +1,6 @@
 package ject.mycode.domain.auth.dto;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -40,5 +41,15 @@ public class AuthRes {
     @Builder
     public static class VerifyCodeResultDTO {
         boolean isVerified;
+    }
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class LoginResultDTO {
+        Long id;
+        String accessToken;
+        String refreshToken;
     }
 }

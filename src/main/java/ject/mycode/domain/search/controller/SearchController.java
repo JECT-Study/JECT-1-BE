@@ -7,6 +7,7 @@ import ject.mycode.domain.search.service.SearchService;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
+import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -29,7 +30,7 @@ public class SearchController {
             @AuthenticationPrincipal User user
     ) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new BaseResponse<>(BaseResponseCode.SEARCH_KEYWORD_MISSING);
+            return new BaseResponse<>(ErrorResponseCode.SEARCH_KEYWORD_MISSING);
         }
 
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);
