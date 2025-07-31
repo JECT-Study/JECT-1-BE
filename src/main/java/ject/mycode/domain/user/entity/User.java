@@ -1,5 +1,6 @@
 package ject.mycode.domain.user.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.SocialType;
@@ -22,6 +23,10 @@ public class User extends BaseEntity {
 	@Column(name = "user_id")
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+
+	// 추후 삭제 예정
+	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	private String password;
 
 	@Column(nullable = false)
 	private String socialId;
@@ -49,7 +54,7 @@ public class User extends BaseEntity {
 	@JoinColumn(name = "region_id")
 	private Region region;
 
-//	public void encodePassword(String password) {
-//		this.password = password;
-//	}
+	public void encodePassword(String password) {
+		this.password = password;
+	}
 }

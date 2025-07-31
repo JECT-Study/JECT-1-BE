@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
-import ject.mycode.domain.auth.dto.KakaoUserRes;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -15,12 +14,10 @@ import ject.mycode.domain.user.entity.User;
 
 public interface UserService {
 	Page<FavoritesRes> getUserFavorites(User user, ContentType contentType, Pageable pageable);
-
 	Page<MySchedulesRes> getMySchedules(User user, LocalDate day, Pageable pageable);
-
 	List<LocalDate> getDaysWithSchedules(User user, YearMonth month);
+	User getUserByEmail(String email);
 
-	Long createUser(KakaoUserRes userResponse);
-	void saveUserIfNotExists(KakaoUserRes kakaoUserRes);
-
+//	Long createUser(KakaoUserRes userResponse);
+//	void saveUserIfNotExists(KakaoUserRes kakaoUserRes);
 }

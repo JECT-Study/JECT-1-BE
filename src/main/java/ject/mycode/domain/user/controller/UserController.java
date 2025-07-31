@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 
+import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -28,7 +29,7 @@ public class UserController {
 	private final UserServiceImpl userService;
 
 	@GetMapping("/users/favorites")
-	public BaseResponse<Page<FavoritesRes>> getUserFavorites(@AuthenticationPrincipal User user,
+	public BaseResponse<Page<FavoritesRes>> getUserFavorites(@CurrentUser User user,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int limit,
 		@RequestParam(required = false)ContentType contentType) {
@@ -39,7 +40,7 @@ public class UserController {
 	}
 
 	@GetMapping("/users/schedules")
-	public BaseResponse<Page<MySchedulesRes>> getMySchedules(@AuthenticationPrincipal User user,
+	public BaseResponse<Page<MySchedulesRes>> getMySchedules(@CurrentUser User user,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int limit,
 		@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
@@ -50,7 +51,7 @@ public class UserController {
 
 	@GetMapping("/users/check/schedules")
 	public BaseResponse<List<LocalDate>> getScheduledDays(
-		@AuthenticationPrincipal User user,
+		@CurrentUser User user,
 		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
 	) {
 		return new BaseResponse<>(BaseResponseCode.GET_SCHEDULED_DATES, userService.getDaysWithSchedules(user, month));

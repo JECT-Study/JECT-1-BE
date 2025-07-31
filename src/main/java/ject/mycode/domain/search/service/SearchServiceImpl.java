@@ -13,6 +13,7 @@ import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
+import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,14 +40,10 @@ public class SearchServiceImpl implements SearchService {
     public SearchContentsRes searchContents(String keyword, int page, int limit, String sort, User user) {
         int offset = (page - 1) * limit;
 
-        // 로그인 기능 완성되면 삭제될 예정
-        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
 
-        User userToSave = userRepository.findById(userIdToSave)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
-
-
-        Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(userIdToSave, keyword);
+        Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(user.getId(), keyword);
 
         if (existingKeyword.isPresent()) {
             // 기존 검색어가 있으면 searchedAt만 업데이트
@@ -57,7 +54,7 @@ public class SearchServiceImpl implements SearchService {
             // 없으면 새로 저장
             searchRepository.save(
                     SearchKeyword.builder()
-                            .user(userToSave)
+                            .user(user)
                             .keyword(keyword)
                             .searchedAt(LocalDateTime.now())
                             .build()
@@ -99,11 +96,11 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public List<String> getRecentSearchKeywords(User user) {
 
-        // 로그인 기능 완성되면 삭제될 예정
-        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
 
         // user별 최근 검색어 10개 조회 (가장 최근 순)
-        return searchRepository.findTop10ByUserIdOrderBySearchedAtDesc(userIdToSave)
+        return searchRepository.findTop10ByUserIdOrderBySearchedAtDesc(user.getId())
                 .stream()
                 .map(SearchKeyword::getKeyword)
                 .toList();
@@ -112,11 +109,12 @@ public class SearchServiceImpl implements SearchService {
 
     @Transactional
     public void deleteKeyword(User user, String keyword) {
-        // 로그인 기능 완성되면 삭제될 예정
-        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
+
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
 
         SearchKeyword searchKeyword = searchRepository
-                .findByUserIdAndKeyword(userIdToSave, keyword)
+                .findByUserIdAndKeyword(user.getId(), keyword)
                 .orElseThrow(() -> new CustomException(BaseResponseCode.SEARCH_KEYWORD_NOT_FOUND));
 
         searchRepository.delete(searchKeyword);
@@ -124,10 +122,11 @@ public class SearchServiceImpl implements SearchService {
 
     @Transactional
     public void deleteAllKeywords(User user) {
-        // 로그인 기능 완성되면 삭제될 예정
-        Long userIdToSave = (user != null) ? user.getId() : 1L; // null이면 1L로 대체
 
-        List<SearchKeyword> keywords = searchRepository.findAllByUserId(userIdToSave);
+        userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
+
+        List<SearchKeyword> keywords = searchRepository.findAllByUserId(user.getId());
         if (keywords.isEmpty()) {
             throw new CustomException(BaseResponseCode.SEARCH_KEYWORD_NOT_FOUND);
         }

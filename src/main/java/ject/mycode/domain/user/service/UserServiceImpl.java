@@ -5,11 +5,13 @@ import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 
-import ject.mycode.domain.auth.dto.KakaoAccount;
-import ject.mycode.domain.auth.dto.KakaoUserRes;
+//import ject.mycode.domain.auth.dto.KakaoAccount;
+//import ject.mycode.domain.auth.dto.KakaoUserRes;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.repository.UserRepository;
+import ject.mycode.global.exception.AuthHandler;
+import ject.mycode.global.response.ErrorResponseCode;
 import ject.mycode.global.util.NicknameGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -57,46 +59,51 @@ public class UserServiceImpl implements UserService {
 			.toList();
 	}
 
-	@Transactional
-	public Long createUser(KakaoUserRes userResponse) {
-		String email = userResponse.kakaoAccount().email();
-
-		Optional<User> existingUser = userRepository.findByEmail(email);
-
-		if (existingUser.isPresent()) {
-			return existingUser.get().getId();
-		}
-
-		User newUser = User.builder()
-				.email(email)
-				.nickname(userResponse.kakaoAccount().profile().nickname())
-				// 필요한 필드들 추가 설정
-				.build();
-
-		User savedUser = userRepository.save(newUser);
-
-		return savedUser.getId();
-	}
-
 	@Override
-	public void saveUserIfNotExists(KakaoUserRes kakaoUserRes) {
-		String kakaoId = String.valueOf(kakaoUserRes.id());
-
-		Optional<User> existingUser = userRepository.findBySocialId(kakaoUserRes.id().toString());
-		if (existingUser.isEmpty()) {
-			KakaoAccount kakaoAccount = kakaoUserRes.kakaoAccount();
-			String nickname = NicknameGenerator.generate();
-			String email = kakaoAccount.email(); // null일 수도 있음
-
-			User newUser = User.builder()
-					.socialId(kakaoId)
-					.nickname(nickname)
-					.email(email)
-					.role(UserRole.NORMAL)
-					.socialType(SocialType.KAKAO)
-					.build();
-
-			userRepository.save(newUser);
-		}
+	public User getUserByEmail(String email) {
+		return userRepository.findByEmail(email).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
 	}
+
+//	@Transactional
+//	public Long createUser(KakaoUserRes userResponse) {
+//		String email = userResponse.kakaoAccount().email();
+//
+//		Optional<User> existingUser = userRepository.findByEmail(email);
+//
+//		if (existingUser.isPresent()) {
+//			return existingUser.get().getId();
+//		}
+//
+//		User newUser = User.builder()
+//				.email(email)
+//				.nickname(userResponse.kakaoAccount().profile().nickname())
+//				// 필요한 필드들 추가 설정
+//				.build();
+//
+//		User savedUser = userRepository.save(newUser);
+//
+//		return savedUser.getId();
+//	}
+//
+//	@Override
+//	public void saveUserIfNotExists(KakaoUserRes kakaoUserRes) {
+//		String kakaoId = String.valueOf(kakaoUserRes.id());
+//
+//		Optional<User> existingUser = userRepository.findBySocialId(kakaoUserRes.id().toString());
+//		if (existingUser.isEmpty()) {
+//			KakaoAccount kakaoAccount = kakaoUserRes.kakaoAccount();
+//			String nickname = NicknameGenerator.generate();
+//			String email = kakaoAccount.email(); // null일 수도 있음
+//
+//			User newUser = User.builder()
+//					.socialId(kakaoId)
+//					.nickname(nickname)
+//					.email(email)
+//					.role(UserRole.NORMAL)
+//					.socialType(SocialType.KAKAO)
+//					.build();
+//
+//			userRepository.save(newUser);
+//		}
+//	}
 }

@@ -1,11 +1,20 @@
 package ject.mycode.domain.auth.dto;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Getter;
 
-@JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public record KakaoUserRes(
-        Long id,
-        KakaoAccount kakaoAccount
-) {
+@Getter
+public class KakaoUserRes {
+    private Properties properties;
+    private KakaoAccount kakao_account;
+
+    @Getter
+    public static class KakaoAccount {
+        private String name;
+        private String email;
+    }
+
+    @Getter
+    public static class Properties {
+        private String nickname;
+    }
 }

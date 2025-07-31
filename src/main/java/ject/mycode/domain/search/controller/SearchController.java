@@ -1,5 +1,6 @@
 package ject.mycode.domain.search.controller;
 
+import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.search.dto.SearchContentsRes;
 import ject.mycode.domain.search.dto.SearchResultRes;
@@ -7,6 +8,7 @@ import ject.mycode.domain.search.service.SearchService;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
+import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +28,10 @@ public class SearchController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "10") int limit,
             @RequestParam(value = "sort", defaultValue = "latest") String sort,
-            @AuthenticationPrincipal User user
+            @CurrentUser User user
     ) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new BaseResponse<>(BaseResponseCode.SEARCH_KEYWORD_MISSING);
+            return new BaseResponse<>(ErrorResponseCode.SEARCH_KEYWORD_MISSING);
         }
 
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);
@@ -38,20 +40,20 @@ public class SearchController {
 
 
     @GetMapping("/recent")
-    public BaseResponse<List<String>> getRecentSearches(@AuthenticationPrincipal User user) {
+    public BaseResponse<List<String>> getRecentSearches(@CurrentUser User user) {
         List<String> recentKeywords = searchService.getRecentSearchKeywords(user);
         return new BaseResponse<>(BaseResponseCode.RECENT_SEARCH_SUCCESS, recentKeywords);
     }
 
     @DeleteMapping("/keywords/{keyword}")
-    public BaseResponse<Void> deleteKeyword(@AuthenticationPrincipal User user,
+    public BaseResponse<Void> deleteKeyword(@CurrentUser User user,
                                             @PathVariable String keyword) {
         searchService.deleteKeyword(user, keyword);
         return new BaseResponse<>(BaseResponseCode.DELETE_SUCCESS);
     }
 
     @DeleteMapping("/keywords")
-    public BaseResponse<?> deleteAllKeywords(@AuthenticationPrincipal User user) {
+    public BaseResponse<?> deleteAllKeywords(@CurrentUser User user) {
 //        if (user == null) {
 //            throw new CustomException(BaseResponseCode.USER_NOT_AUTHENTICATED);
 //        }

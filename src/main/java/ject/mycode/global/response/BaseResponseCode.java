@@ -9,7 +9,10 @@ import lombok.Getter;
 @AllArgsConstructor
 public enum BaseResponseCode {
 	// 1000번대 : 성공코드
-	LOGIN_SUCCESS(true, 1000, "카카오 로그인 성공", HttpStatus.OK),
+	LOGIN_SUCCESS(true, 1000, "로그인 성공", HttpStatus.OK),
+	TOKEN_REISSUE_SUCCESS(true, 1001, "토큰 재발급이 완료되었습니다.", HttpStatus.OK),
+	LOGOUT_SUCCESS(true, 1002, "로그아웃이 완료되었습니다.", HttpStatus.OK),
+
 
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),
@@ -43,10 +46,8 @@ public enum BaseResponseCode {
 	DELETE_ALL_SUCCESS(true, 2303,"최근 검색어가 모두 삭제되었습니다.", HttpStatus.OK),
 	POPULAR_KEYWORD_SUCCESS(true, 2304,"인기 검색어를 조회합니다. (최대 10개)", HttpStatus.OK),
 	SEARCH_RESULT_SUCCESS(true, 2305,"검색 결과 페이지를 조회합니다.", HttpStatus.OK),
-
 	SEARCH_KEYWORD_MISSING(false, 2311, "검색어를 입력해 주세요.",  HttpStatus.NOT_FOUND),
 	SEARCH_KEYWORD_NOT_FOUND(false, 2312, "검색어를 찾을 수 없습니다.",  HttpStatus.NOT_FOUND),
-
 
 	// 3000번대 : 응답 오류
 
