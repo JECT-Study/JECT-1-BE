@@ -1,7 +1,7 @@
 package ject.mycode.domain.content.controller;
 
+import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import ject.mycode.domain.content.service.ContentService;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
@@ -21,7 +21,7 @@ public class ContentController{
 
 
 	@PostMapping("/{contentId}/favorites")
-	public BaseResponse<Long> addFavorite(@AuthenticationPrincipal User user, @PathVariable Long contentId){
+	public BaseResponse<Long> addFavorite(@CurrentUser User user, @PathVariable Long contentId){
 		return new BaseResponse<>(BaseResponseCode.ADD_FAVORITE, contentServiceImpl.addFavorite(user, contentId));
 	}
 
