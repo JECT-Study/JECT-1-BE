@@ -1,12 +1,11 @@
-package ject.mycode.domain.auth.dto;
+package ject.mycode.domain.auth.jwt.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class TokenResponse {
+public class JwtRes {
     private String accessToken;
     private String refreshToken;
 }
-

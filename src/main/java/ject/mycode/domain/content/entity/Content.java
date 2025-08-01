@@ -64,6 +64,10 @@ public class Content extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private ContentStatus status;
+  
+    // 조회수
+    @Column(nullable = false)
+    private int views;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -75,4 +79,9 @@ public class Content extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "region_id")
     private Region region;
+
+    public void setViews(int views) {
+        this.views = views;
+    }
+
 }

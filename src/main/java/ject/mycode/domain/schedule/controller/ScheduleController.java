@@ -1,6 +1,6 @@
 package ject.mycode.domain.schedule.controller;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,7 +20,7 @@ public class ScheduleController {
 	private final ScheduleServiceImpl scheduleServiceImpl;
 
 	@PostMapping("/contents/{contentId}/schedules")
-	public BaseResponse<Long> addSchedule(@AuthenticationPrincipal User user, @PathVariable Long contentId, @RequestBody
+	public BaseResponse<Long> addSchedule(@CurrentUser User user, @PathVariable Long contentId, @RequestBody
 		AddScheduleReq addScheduleReq) {
 
 		return new BaseResponse<>(BaseResponseCode.ADD_SCHEDULE_SUCCESS,
