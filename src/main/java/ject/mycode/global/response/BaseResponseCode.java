@@ -26,6 +26,12 @@ public enum BaseResponseCode {
 	GET_MY_SCHEDULES(true, 1301, "나의 일정을 불러옵니다.", HttpStatus.OK),
 	GET_SCHEDULED_DATES(true, 1302, "일정이 있는 날짜들을 불러옵니다.", HttpStatus.OK),
 
+	//1400 ~ 1499 설문 관련
+	SAVE_ANSWER_SUCCESS(true, 1400, "설문이 완료되었습니다.", HttpStatus.CREATED),
+
+	// 1900 ~ 1999 기타
+	SAVE_CONTENT_INFO(true, 1900, "컨텐츠 정보를 api로 불러와서 저장했습니다.", HttpStatus.CREATED),
+
 	// 2000번대 : 클라이언트 오류
 
 	// 2100 ~ 2199 : 컨텐츠 관련
