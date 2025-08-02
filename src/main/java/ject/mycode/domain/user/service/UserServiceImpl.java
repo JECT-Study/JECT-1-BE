@@ -3,16 +3,9 @@ package ject.mycode.domain.user.service;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
-import java.util.Optional;
-
-//import ject.mycode.domain.auth.dto.KakaoAccount;
-//import ject.mycode.domain.auth.dto.KakaoUserRes;
-import ject.mycode.domain.user.enums.SocialType;
-import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.response.ErrorResponseCode;
-import ject.mycode.global.util.NicknameGenerator;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

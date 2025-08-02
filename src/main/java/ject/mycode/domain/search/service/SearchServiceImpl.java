@@ -11,7 +11,6 @@ import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.search.entity.SearchKeyword;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.CustomException;
-import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
