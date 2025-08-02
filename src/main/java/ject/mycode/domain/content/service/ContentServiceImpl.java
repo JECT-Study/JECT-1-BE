@@ -2,6 +2,7 @@ package ject.mycode.domain.content.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.content.enums.ContentType;
@@ -17,6 +18,7 @@ import ject.mycode.domain.favorite.entity.Favorite;
 import ject.mycode.domain.favorite.repository.FavoriteRepository;
 import ject.mycode.domain.tag.repository.contentTagRepo.ContentTagRepository;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,7 @@ public class ContentServiceImpl implements ContentService {
 	private final ContentQueryRepositoryImpl contentQueryRepository;
 	private final ContentImageRepository contentImageRepository;
 	private final ContentTagRepository contentTagRepository;
+	private final UserRepository userRepository;
 
 	@Override
 	@Transactional
@@ -47,10 +50,10 @@ public class ContentServiceImpl implements ContentService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public ContentDetailsRes getContentDetails(Long contentId) {
-		ContentDetailsRes findDetailsDto = contentQueryRepository.findDetailsByContentId(contentId);
+	public ContentDetailsRes getContentDetails(User user, Long contentId) {
+		ContentDetailsRes findDetailsDto = contentQueryRepository.findDetailsByContentId(user, contentId);
 
-		if(findDetailsDto == null) {
+		if (findDetailsDto == null) {
 			throw new CustomException(BaseResponseCode.CONTENT_NOT_EXIST);
 		}
 

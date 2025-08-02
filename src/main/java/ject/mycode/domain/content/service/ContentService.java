@@ -10,7 +10,7 @@ import java.util.List;
 public interface ContentService {
 	Long addFavorite(User user, Long contentId);
 
-	ContentDetailsRes getContentDetails(Long contentId);
+	ContentDetailsRes getContentDetails(User user, Long contentId);
 
 	List<ContentRecommendRes> getRecommendedContents(ContentType contentType);
 
