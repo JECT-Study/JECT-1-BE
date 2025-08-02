@@ -9,9 +9,10 @@ import org.springframework.data.domain.Pageable;
 
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.entity.User;
 
 public interface ContentQueryRepository {
-	ContentDetailsRes findDetailsByContentId(Long contentId);
+	ContentDetailsRes findDetailsByContentId(User user, Long contentId);
 
 	Page<FavoritesRes> findFavoritesByUserId(Long userId, ContentType contentType, Pageable pageable);
 

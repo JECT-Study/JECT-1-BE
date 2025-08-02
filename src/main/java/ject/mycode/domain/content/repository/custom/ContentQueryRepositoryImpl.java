@@ -24,6 +24,7 @@ import ject.mycode.domain.schedule.entity.QSchedule;
 import ject.mycode.domain.tag.entity.QContentTag;
 import ject.mycode.domain.tag.entity.QTag;
 import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -40,10 +41,50 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QSchedule schedule = QSchedule.schedule;
 
 	@Override
-	public ContentDetailsRes findDetailsByContentId(Long contentId) {
+	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
 		// TODO: 후에 날쿼리로 리팩토링
+		// 비로그인 사용자인 경우
+		if (user == null) {
+			return qf.select(Projections.constructor(ContentDetailsRes.class,
+					content.id,
+					Expressions.nullExpression(), // likeId
+					Expressions.nullExpression(), // scheduleId
+					content.title,
+					Expressions.constant(Collections.emptyList()),
+					Expressions.constant(Collections.emptyList()),
+					content.placeName,
+					content.startDate,
+					content.endDate,
+					JPAExpressions.select(favorite.count())
+						.from(favorite)
+						.where(favorite.content.id.eq(contentId)),
+					content.isAlwaysOpen,
+					content.openingHour,
+					content.closedHour,
+					content.address,
+					content.introduction,
+					content.description,
+					content.longitude,
+					content.latitude
+				))
+				.from(content)
+				.where(content.id.eq(contentId))
+				.fetchOne();
+		}
+
+		// 로그인 상태인 경우
+		QFavorite favoriteSub = QFavorite.favorite;
+
 		return qf.select(Projections.constructor(ContentDetailsRes.class,
 				content.id,
+				JPAExpressions.select(favoriteSub.id)
+					.from(favoriteSub)
+					.where(favoriteSub.content.id.eq(contentId)
+						.and(favoriteSub.user.id.eq(user.getId()))),
+				JPAExpressions.select(schedule.id)
+					.from(schedule)
+					.where(schedule.content.id.eq(contentId)
+						.and(schedule.user.id.eq(user.getId()))),
 				content.title,
 				Expressions.constant(Collections.emptyList()),
 				Expressions.constant(Collections.emptyList()),

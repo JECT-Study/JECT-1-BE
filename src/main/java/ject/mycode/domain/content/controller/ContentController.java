@@ -2,6 +2,8 @@ package ject.mycode.domain.content.controller;
 
 import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import ject.mycode.domain.content.service.ContentService;
+
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
@@ -26,8 +28,9 @@ public class ContentController{
 	}
 
 	@GetMapping("/{contentId}")
-	public BaseResponse<ContentDetailsRes> getContentDetails(@PathVariable Long contentId){
+	public BaseResponse<ContentDetailsRes> getContentDetails(@AuthenticationPrincipal User user,
+		@PathVariable Long contentId) {
 		return new BaseResponse<>(BaseResponseCode.GET_CONTENT_DETAILS,
-			contentServiceImpl.getContentDetails(contentId));
+			contentServiceImpl.getContentDetails(user, contentId));
 	}
 }
