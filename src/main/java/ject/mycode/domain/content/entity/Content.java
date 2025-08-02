@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.contentTrait.entity.ContentTrait;
 import ject.mycode.domain.region.entity.Region;
+import ject.mycode.domain.user.enums.ContentStatus;
 import ject.mycode.global.entity.BaseEntity;
 import lombok.*;
 
@@ -23,10 +24,12 @@ public class Content extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String apiId;
+
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false)
+    @Column
     private String placeName;
 
     @Column(columnDefinition = "TEXT", nullable = false)
@@ -56,6 +59,12 @@ public class Content extends BaseEntity {
     @Column(nullable = false)
     private Double longitude;
 
+    @Column(columnDefinition = "TEXT")
+    private String homepageUrl;
+
+    @Enumerated(EnumType.STRING)
+    private ContentStatus status;
+  
     // 조회수
     @Column(nullable = false)
     private int views;
