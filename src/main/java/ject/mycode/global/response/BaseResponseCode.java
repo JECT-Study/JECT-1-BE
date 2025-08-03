@@ -13,7 +13,6 @@ public enum BaseResponseCode {
 	TOKEN_REISSUE_SUCCESS(true, 1001, "토큰 재발급이 완료되었습니다.", HttpStatus.OK),
 	LOGOUT_SUCCESS(true, 1002, "로그아웃이 완료되었습니다.", HttpStatus.OK),
 
-
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),
 	GET_CONTENT_DETAILS(true, 1101, "컨텐츠 상세페이지를 불러옵니다.", HttpStatus.OK),
@@ -23,7 +22,8 @@ public enum BaseResponseCode {
 	GET_SAME_CATEGORY_CONTENT(true, 1104, "카테고리별 콘텐츠를 불러옵니다.", HttpStatus.OK),
 
 	// 1200 ~ 1299 : 일정 관련
-	ADD_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
+	ADD_MY_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
+	GET_SCHEDULE_SUCCESS(true, 1201, "해당 날짜 컨텐츠들을 불러옵니다.", HttpStatus.OK),
 
 	//1300 ~ 1399 : 마이페이지 관련
 	GET_FAVORITES(true, 1300, "관심목록을 불러옵니다.", HttpStatus.OK),
@@ -48,12 +48,12 @@ public enum BaseResponseCode {
 	// 2300~2399 : 검색 관련
 	SEARCH_SUCCESS(true, 2300, "컨텐츠를 검색합니다.", HttpStatus.OK),
 	RECENT_SEARCH_SUCCESS(true, 2301, "최근 검색어 목록을 조회합니다.", HttpStatus.OK),
-	DELETE_SUCCESS(true, 2302,"최근 검색어가 삭제되었습니다.", HttpStatus.OK),
-	DELETE_ALL_SUCCESS(true, 2303,"최근 검색어가 모두 삭제되었습니다.", HttpStatus.OK),
-	POPULAR_KEYWORD_SUCCESS(true, 2304,"인기 검색어를 조회합니다. (최대 10개)", HttpStatus.OK),
-	SEARCH_RESULT_SUCCESS(true, 2305,"검색 결과 페이지를 조회합니다.", HttpStatus.OK),
-	SEARCH_KEYWORD_MISSING(false, 2311, "검색어를 입력해 주세요.",  HttpStatus.NOT_FOUND),
-	SEARCH_KEYWORD_NOT_FOUND(false, 2312, "검색어를 찾을 수 없습니다.",  HttpStatus.NOT_FOUND),
+	DELETE_SUCCESS(true, 2302, "최근 검색어가 삭제되었습니다.", HttpStatus.OK),
+	DELETE_ALL_SUCCESS(true, 2303, "최근 검색어가 모두 삭제되었습니다.", HttpStatus.OK),
+	POPULAR_KEYWORD_SUCCESS(true, 2304, "인기 검색어를 조회합니다. (최대 10개)", HttpStatus.OK),
+	SEARCH_RESULT_SUCCESS(true, 2305, "검색 결과 페이지를 조회합니다.", HttpStatus.OK),
+	SEARCH_KEYWORD_MISSING(false, 2311, "검색어를 입력해 주세요.", HttpStatus.NOT_FOUND),
+	SEARCH_KEYWORD_NOT_FOUND(false, 2312, "검색어를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 
 	// 3000번대 : 응답 오류
 

@@ -23,8 +23,9 @@ import ject.mycode.domain.favorite.entity.QFavorite;
 import ject.mycode.domain.schedule.entity.QSchedule;
 import ject.mycode.domain.tag.entity.QContentTag;
 import ject.mycode.domain.tag.entity.QTag;
-import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.domain.user.enums.ContentStatus;
 import lombok.RequiredArgsConstructor;
 
 @Repository
@@ -157,16 +158,16 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	}
 
 	@Override
-	public Page<MySchedulesRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable) {
+	public Page<SchedulesInfoRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable) {
 		BooleanBuilder builder = new BooleanBuilder();
 		builder.and(schedule.user.id.eq(userId));
 		builder.and(schedule.scheduleDate.eq(day));
 
 		QContentImage contentImageSub = new QContentImage("contentImageSub");
 
-		List<MySchedulesRes> schedules = qf
+		List<SchedulesInfoRes> schedules = qf
 			.select(Projections.constructor(
-				MySchedulesRes.class,
+				SchedulesInfoRes.class,
 				content.id,
 				content.title,
 				contentImage.imageUrl,
@@ -228,7 +229,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	@Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
 		return qf
-			.select(schedule.scheduleDate) // 바로 날짜만!
+			.select(schedule.scheduleDate)
 			.from(schedule)
 			.where(
 				schedule.user.id.eq(userId),
@@ -269,7 +270,6 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 
 	@Override
 	public List<WeeklyContentRes> findContentsByDate(LocalDate date) {
-
 		return qf
 				.select(Projections.constructor(
 						WeeklyContentRes.class,
@@ -313,5 +313,53 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate
 				)
 				.fetch();
+	}
+
+	@Override
+	public Page<SchedulesInfoRes> findSchedulesByDate(Pageable pageable, LocalDate day) {
+		QContentImage contentImageSub = new QContentImage("contentImageSub");
+
+		List<SchedulesInfoRes> schedules = qf
+			.select(Projections.constructor(
+				SchedulesInfoRes.class,
+				content.id,
+				content.title,
+				contentImage.imageUrl,
+				content.address,
+				content.startDate,
+				content.endDate
+			))
+			.from(schedule)
+			.join(schedule.content, content)
+			.leftJoin(contentImage).on(
+				contentImage.id.eq(
+					JPAExpressions
+						.select(contentImageSub.id.min())
+						.from(contentImageSub)
+						.where(contentImageSub.content.eq(content))
+				)
+			)
+			.where(
+				content.startDate.loe(day),
+				content.endDate.goe(day),
+				content.status.eq(ContentStatus.ACTIVE)
+			)
+			.orderBy(content.endDate.asc())
+			.offset(pageable.getOffset())
+			.limit(pageable.getPageSize())
+			.fetch();
+
+		Long total = qf
+			.select(content.count())
+			.from(schedule)
+			.join(schedule.content, content)
+			.where(
+				content.startDate.loe(day),
+				content.endDate.goe(day),
+				content.status.eq(ContentStatus.ACTIVE)
+			)
+			.fetchOne();
+
+		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
 }

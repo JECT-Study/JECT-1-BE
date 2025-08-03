@@ -1,6 +1,7 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.*;
@@ -8,7 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import ject.mycode.domain.content.enums.ContentType;
-import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
 
 public interface ContentQueryRepository {
@@ -16,7 +17,7 @@ public interface ContentQueryRepository {
 
 	Page<FavoritesRes> findFavoritesByUserId(Long userId, ContentType contentType, Pageable pageable);
 
-	Page<MySchedulesRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable);
+	Page<SchedulesInfoRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable);
 
 	List<ContentRecommendRes> findRecommendedContents(ContentType contentType);
   
@@ -27,4 +28,6 @@ public interface ContentQueryRepository {
 	List<WeeklyContentRes> findContentsByDate(LocalDate date);
 
 	List<ContentCategoryRes> findContentsByCategory(ContentType contentType);
+
+	Page<SchedulesInfoRes> findSchedulesByDate(Pageable pageable, LocalDate day);
 }
