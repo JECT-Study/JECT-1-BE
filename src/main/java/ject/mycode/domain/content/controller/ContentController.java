@@ -28,7 +28,7 @@ public class ContentController{
 	}
 
 	@GetMapping("/{contentId}")
-	public BaseResponse<ContentDetailsRes> getContentDetails(@AuthenticationPrincipal User user,
+	public BaseResponse<ContentDetailsRes> getContentDetails(@CurrentUser User user,
 		@PathVariable Long contentId) {
 		return new BaseResponse<>(BaseResponseCode.GET_CONTENT_DETAILS,
 			contentServiceImpl.getContentDetails(user, contentId));

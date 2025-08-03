@@ -9,7 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class MySchedulesRes {
+public class SchedulesInfoRes {
 	private Long contentId;
 	private String title;
 	private String image;

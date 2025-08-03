@@ -44,8 +44,6 @@ public class User extends BaseEntity {
 	@Column(columnDefinition = "TEXT")
 	private String image;
 
-	//private String provider;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserRole role;

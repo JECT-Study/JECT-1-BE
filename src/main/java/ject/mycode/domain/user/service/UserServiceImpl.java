@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.content.repository.custom.ContentQueryRepositoryImpl;
-import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 
@@ -34,7 +34,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public Page<MySchedulesRes> getMySchedules(User user, LocalDate day, Pageable pageable) {
+	public Page<SchedulesInfoRes> getMySchedules(User user, LocalDate day, Pageable pageable) {
 
 		return contentQueryRepository.findMySchedulesByUserId(user.getId(), day,
 			pageable);

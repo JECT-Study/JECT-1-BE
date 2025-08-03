@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
-import ject.mycode.domain.user.dto.MySchedulesRes;
+import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.service.UserServiceImpl;
 import ject.mycode.global.response.BaseResponse;
@@ -39,7 +39,7 @@ public class UserController {
 	}
 
 	@GetMapping("/users/schedules")
-	public BaseResponse<Page<MySchedulesRes>> getMySchedules(@CurrentUser User user,
+	public BaseResponse<Page<SchedulesInfoRes>> getMySchedules(@CurrentUser User user,
 		@RequestParam(defaultValue = "0") int page,
 		@RequestParam(defaultValue = "10") int limit,
 		@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate day) {
@@ -48,7 +48,7 @@ public class UserController {
 		return new BaseResponse<>(BaseResponseCode.GET_MY_SCHEDULES, userService.getMySchedules(user, day, pageable));
 	}
 
-	@GetMapping("/users/check/schedules")
+	@GetMapping("/users/schedules/check")
 	public BaseResponse<List<LocalDate>> getScheduledDays(
 		@CurrentUser User user,
 		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
