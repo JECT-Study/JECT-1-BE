@@ -71,3 +71,11 @@ spring:
 tour:
   api:
     key: ${OPEN_API_KEY}
+
+apple:
+  key-path: ${APPLE_KEY_PATH}
+  client-id: ${APPLE_CLIENT_ID}
+  team-id: ${APPLE_TEAM_ID}
+  key-id: ${APPLE_KEY_ID}
+  aud: ${APPLE_AUD}
+  iss: ${APPLE_ISS}
