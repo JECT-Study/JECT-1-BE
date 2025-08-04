@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
-@EnableFeignClients(basePackages = "ject.mycode.domain.auth")
+@EnableFeignClients
 @ImportAutoConfiguration(FeignAutoConfiguration.class)
 @SpringBootApplication
 @EnableJpaAuditing

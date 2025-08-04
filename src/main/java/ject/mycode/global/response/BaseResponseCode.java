@@ -12,6 +12,8 @@ public enum BaseResponseCode {
 	LOGIN_SUCCESS(true, 1000, "로그인 성공", HttpStatus.OK),
 	TOKEN_REISSUE_SUCCESS(true, 1001, "토큰 재발급이 완료되었습니다.", HttpStatus.OK),
 	LOGOUT_SUCCESS(true, 1002, "로그아웃이 완료되었습니다.", HttpStatus.OK),
+	KAKAO_LOGIN_SUCCESS(true, 1003, "카카오 로그인 성공", HttpStatus.OK),
+	APPLE_LOGIN_SUCCESS(true, 1004, "애플 로그인 성공", HttpStatus.OK),
 
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),

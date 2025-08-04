@@ -136,7 +136,7 @@ public class JwtProvider {
         Long userId = getId(refreshToken);
 
         return new JwtRes(
-                createAccessToken((PrincipalDetails) userDetails, userId),
+                createAccessToken((PrincipalDetails)userDetails, userId),
                 createRefreshToken((PrincipalDetails)userDetails, userId)
         );
     }
