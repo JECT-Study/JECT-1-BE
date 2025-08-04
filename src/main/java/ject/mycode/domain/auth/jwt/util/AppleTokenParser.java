@@ -9,13 +9,16 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.UnsupportedJwtException;
 import ject.mycode.global.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AppleTokenParser {
@@ -26,9 +29,11 @@ public class AppleTokenParser {
     private final ObjectMapper objectMapper;
 
     public Map<String, String> parseHeader(String idToken) {
+        log.info("idToken : " + idToken);
+
         try {
             final String encodedHeader = idToken.split(ID_TOKEN_SEPARATOR)[HEADER_INDEX];
-            final String decodedHeader = Arrays.toString(Base64.getUrlDecoder().decode(encodedHeader));
+            final String decodedHeader =  new String(Base64.getUrlDecoder().decode(encodedHeader), StandardCharsets.UTF_8);
 
             return objectMapper.readValue(decodedHeader, Map.class);
 

@@ -9,7 +9,6 @@ import java.util.Date;
 @Component
 public class AppleClaimsValidator {
 
-    private static final String NONCE_KEY = "nonce";
     private final String iss;
     private final String clientId;
 
@@ -22,11 +21,11 @@ public class AppleClaimsValidator {
     }
 
     public boolean isValid(Claims claims) {
-        // exp, nonce, iss, aud 검증
+        // exp, iss, aud 검증
         Date expiration = claims.getExpiration();
         Date currentDate = new Date();
 
-        return expiration.before(currentDate) &&
+        return currentDate.before(expiration) &&
                 claims.getIssuer().contains(iss) &&
                 claims.getAudience().equals(clientId);
     }

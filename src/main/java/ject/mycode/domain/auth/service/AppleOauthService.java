@@ -57,7 +57,7 @@ public class AppleOauthService {
             return appleClientSecretProvider.createClientSecret();
         } catch (Exception e) {
             log.error("Apple 클라이언트 시크릿 생성에 실패했습니다. 오류: {}", e.getMessage(), e);
-            throw new AppleOauthException("e.getMessage()");
+            throw new AppleOauthException(e.getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ public class AppleOauthService {
             return appleClient.appleAuth(clientId, code, GRANT_TYPE, clientSecret);
         } catch (Exception e) {
             log.error("Apple 토큰 요청에 실패했습니다. 오류: {}", e.getMessage(), e);
-            throw new AppleOauthException("e.getMessage()");
+            throw new AppleOauthException("Apple 토큰 요청 실패");
         }
     }
 
@@ -95,7 +95,7 @@ public class AppleOauthService {
         // iss, aud, exp, 검증
         if (!appleClaimsValidator.isValid(claims)) {
             log.error("Apple Claims 유효성 검사 실패. 잘못된 Apple 토큰입니다. {}", claims);
-            throw new AppleOauthException("e.getMessage()");
+            throw new AppleOauthException("Apple Claims 유효성 검사 실패");
         }
 
         Map<String, String> appleResponse = extractAppleResponse(claims);
