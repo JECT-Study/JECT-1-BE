@@ -26,7 +26,6 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class AuthCommandServiceImpl implements AuthCommandService {
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
     private final RedisUtil redisUtil;
 
