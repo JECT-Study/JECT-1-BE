@@ -4,7 +4,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import ject.mycode.domain.user.enums.SocialType;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class AuthReq {
     @Getter
@@ -60,6 +64,9 @@ public class AuthReq {
     @Getter
     public static class SocialLoginDTO {
         @NotNull
-        String code;
+        SocialType socialType;
+        @NotNull
+        String socialId;
     }
+
 }

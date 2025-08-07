@@ -1,5 +1,6 @@
 package ject.mycode.domain.auth.dto;
 
+import ject.mycode.domain.user.enums.SocialType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

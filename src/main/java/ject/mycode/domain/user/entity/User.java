@@ -26,6 +26,7 @@ public class User extends BaseEntity {
 
 	// 추후 삭제 예정
 	@JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
+	@Column(nullable = true)
 	private String password;
 
 	@Column(nullable = false)
@@ -38,7 +39,7 @@ public class User extends BaseEntity {
 	@Column(unique = true, nullable = false)
 	private String nickname;
 
-	@Column(nullable = false, unique = true)
+	@Column(nullable = true, unique = true)
 	private String email;
 
 	@Column(columnDefinition = "TEXT")

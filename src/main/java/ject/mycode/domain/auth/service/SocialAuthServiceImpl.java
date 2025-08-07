@@ -37,30 +37,30 @@ public class SocialAuthServiceImpl implements SocialAuthService {
     private final JwtProvider jwtProvider;
     private final Gson gson;
 
-    @Override
-    public AuthRes.LoginResultDTO login(String provider, AuthReq.SocialLoginDTO request) {
-        // yml 파일의 social 아래 값을 자바 객체로 매핑
-        SocialProperties.ProviderProperties properties = getProviderProperties(provider);
-
-        // 인가 코드를 이용하여 AccessToken 가져옴
-        String accessToken = getAccessToken(
-                URLDecoder.decode(request.getCode(), StandardCharsets.UTF_8),
-                properties.getClientId(),
-                properties.getClientSecret(),
-                properties.getRedirectUri(),
-                properties.getTokenUri()
-        );
-
-        // AccessToken을 사용하여 유저 정보를 가져옴
-        Object userInfo = getUserInfo(
-                accessToken,
-                properties.getUserInfoUri(),
-                getMethod(provider),
-                getUserInfoClass(provider)
-        );
-
-        return socialLogin(provider, userInfo);
-    }
+//    @Override
+//    public AuthRes.LoginResultDTO login(String provider, AuthReq.SocialLoginDTO request) {
+//        // yml 파일의 social 아래 값을 자바 객체로 매핑
+//        SocialProperties.ProviderProperties properties = getProviderProperties(provider);
+//
+//        // 인가 코드를 이용하여 AccessToken 가져옴
+//        String accessToken = getAccessToken(
+//                URLDecoder.decode(request.getCode(), StandardCharsets.UTF_8),
+//                properties.getClientId(),
+//                properties.getClientSecret(),
+//                properties.getRedirectUri(),
+//                properties.getTokenUri()
+//        );
+//
+//        // AccessToken을 사용하여 유저 정보를 가져옴
+//        Object userInfo = getUserInfo(
+//                accessToken,
+//                properties.getUserInfoUri(),
+//                getMethod(provider),
+//                getUserInfoClass(provider)
+//        );
+//
+//        return socialLogin(provider, userInfo);
+//    }
 
     // 인가 코드를 이용하여 AccessToken 가져옴
     private String getAccessToken(String code, String clientId, String clientSecret, String redirectUri, String tokenUri) {

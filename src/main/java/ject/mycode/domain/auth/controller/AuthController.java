@@ -28,17 +28,23 @@ public class AuthController {
         return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, UserConverter.toSignupResultDTO(authCommandService.signup(request)));
     }
 
-    @Operation(summary = "일반 로그인", description = "일반 로그인 기능입니다.")
+//    @Operation(summary = "일반 로그인", description = "일반 로그인 기능입니다.")
+//    @PostMapping("/login")
+//    public BaseResponse<AuthRes.LoginResultDTO> login(@RequestBody @Valid AuthReq.LoginDTO request) {
+//        return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, authCommandService.login(request));
+//    }
+
+    @Operation(summary = "소셜 로그인", description = "소셜 로그인 기능입니다.")
     @PostMapping("/login")
-    public BaseResponse<AuthRes.LoginResultDTO> login(@RequestBody @Valid AuthReq.LoginDTO request) {
+    public BaseResponse<AuthRes.LoginResultDTO> socialLogin(@RequestBody @Valid AuthReq.SocialLoginDTO request) {
         return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, authCommandService.login(request));
     }
 
-    @Operation(summary = "카카오 로그인", description = "카카오 인가 코드를 입력받아 로그인을 처리합니다.")
-    @PostMapping("/social/kakao")
-    public BaseResponse<AuthRes.LoginResultDTO> kakaoLogin(@Valid @RequestBody AuthReq.SocialLoginDTO request) {
-        return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, socialAuthService.login("kakao", request));
-    }
+//    @Operation(summary = "카카오 로그인", description = "카카오 인가 코드를 입력받아 로그인을 처리합니다.")
+//    @PostMapping("/social/kakao")
+//    public BaseResponse<AuthRes.LoginResultDTO> kakaoLogin(@Valid @RequestBody AuthReq.SocialLoginDTO request) {
+//        return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, socialAuthService.login("kakao", request));
+//    }
 
     @Operation(summary = "토큰 재발급", description = "accessToken이 만료 시 refreshToken을 통해 accessToken을 재발급합니다.")
     @PostMapping("/token/refresh")

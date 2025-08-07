@@ -9,14 +9,17 @@ import ject.mycode.domain.auth.jwt.userdetails.PrincipalDetails;
 import ject.mycode.domain.auth.jwt.util.JwtProvider;
 import ject.mycode.domain.user.converter.UserConverter;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.util.NicknameGenerator;
 import ject.mycode.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -38,21 +41,39 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     }
 
     @Override
-    public AuthRes.LoginResultDTO login(AuthReq.LoginDTO request) {
-        User user = userRepository.findById(Long.valueOf(request.getUserId())).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
+    public AuthRes.LoginResultDTO login(AuthReq.SocialLoginDTO request) {
+        // socialId + socialType 기준으로 사용자 조회
+        Optional<User> optionalUser = userRepository.findBySocialIdAndSocialType(
+                request.getSocialId(), request.getSocialType()
+        );
 
-        if(!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new AuthHandler(ErrorResponseCode.PASSWORD_NOT_EQUAL);
+        User user;
+
+        if (optionalUser.isPresent()) {
+            // 이미 존재하는 사용자 → 로그인 처리
+            user = optionalUser.get();
+        } else {
+            // 사용자 없으면 → 회원가입 처리
+            user = User.builder()
+                    .socialId(request.getSocialId())
+                    .socialType(request.getSocialType())
+                    .nickname(NicknameGenerator.generate()) // 랜덤 닉네임
+                    .role(UserRole.NORMAL) // 권한 기본값
+                    .region(null)
+                    .image(null)
+                    .build();
+
+            userRepository.save(user);
         }
 
+        // 토큰 생성
         PrincipalDetails memberDetails = new PrincipalDetails(user);
-
-        // 로그인 성공 시 토큰 생성
         String accessToken = jwtProvider.createAccessToken(memberDetails, user.getId());
         String refreshToken = jwtProvider.createRefreshToken(memberDetails, user.getId());
 
         return UserConverter.toLoginResultDTO(user, accessToken, refreshToken);
     }
+
 
     @Override
     public JwtRes reissueToken(String refreshToken) {
@@ -74,7 +95,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             redisUtil.set(accessToken, "logout");
             redisUtil.expire(accessToken, jwtProvider.getExpTime(accessToken), TimeUnit.MILLISECONDS);
             // RefreshToken 삭제
-            redisUtil.delete(jwtProvider.getEmail(accessToken));
+            redisUtil.delete(jwtProvider.getSocialId(accessToken));
         } catch (ExpiredJwtException e) {
             throw new AuthHandler(ErrorResponseCode.TOKEN_EXPIRED);
         }

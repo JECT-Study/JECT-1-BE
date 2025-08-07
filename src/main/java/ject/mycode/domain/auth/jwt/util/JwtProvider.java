@@ -66,7 +66,7 @@ public class JwtProvider {
 
         String refreshToken = Jwts.builder()
                 .setHeader(Map.of("alg", "HS256", "typ", "JWT"))
-                .setSubject(userDetails.getUsername()) // 이메일
+                .setSubject(userDetails.getUsername()) // 소셜아이디
                 .claim("id", userId)
                 .issuedAt(Date.from(issuedAt))
                 .expiration(Date.from(expiredAt))
@@ -102,7 +102,7 @@ public class JwtProvider {
 
     // RefreshToken 유효성 확인
     public void validateRefreshToken(String refreshToken) {
-        String username = getEmail(refreshToken);
+        String username = getSocialId(refreshToken);
 
         //redis 확인
         if (!redisUtil.exists(username)) {
@@ -110,8 +110,7 @@ public class JwtProvider {
         }
     }
 
-    //email 추출
-    public String getEmail(String token) {
+    public String getSocialId(String token) {
         return getClaims(token).getBody().getSubject();
     }
 
@@ -132,7 +131,7 @@ public class JwtProvider {
 
     // 토큰 재발급
     public JwtRes reissueToken(String refreshToken) throws SignatureException {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getEmail(refreshToken));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(getSocialId(refreshToken));
         Long userId = getId(refreshToken);
 
         return new JwtRes(
