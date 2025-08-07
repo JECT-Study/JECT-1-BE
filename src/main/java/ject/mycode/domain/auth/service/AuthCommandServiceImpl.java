@@ -31,16 +31,6 @@ public class AuthCommandServiceImpl implements AuthCommandService {
     private final RedisUtil redisUtil;
 
     @Override
-    public User signup(AuthReq.SignupDTO request) {
-        if(!request.getPassword().equals(request.getPasswordCheck())) {
-            throw new AuthHandler(ErrorResponseCode.PASSWORD_NOT_EQUAL);
-        }
-        User newUser = UserConverter.toUser(request);
-        newUser.encodePassword(passwordEncoder.encode(request.getPassword()));
-        return userRepository.save(newUser);
-    }
-
-    @Override
     public AuthRes.LoginResultDTO login(AuthReq.SocialLoginDTO request) {
         // socialId + socialType 기준으로 사용자 조회
         Optional<User> optionalUser = userRepository.findBySocialIdAndSocialType(
@@ -99,16 +89,5 @@ public class AuthCommandServiceImpl implements AuthCommandService {
         } catch (ExpiredJwtException e) {
             throw new AuthHandler(ErrorResponseCode.TOKEN_EXPIRED);
         }
-    }
-
-    @Override
-    public boolean checkNickname(AuthReq.CheckNicknameDTO request) {
-        System.out.println(request.getNickname());
-        return userRepository.existsByNickname(request.getNickname());
-    }
-
-    @Override
-    public boolean checkId(AuthReq.CheckIdDTO request) {
-        return userRepository.existsById(request.getId());
     }
 }
