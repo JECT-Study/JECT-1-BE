@@ -1,6 +1,5 @@
 package ject.mycode.domain.user.entity;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.SocialType;

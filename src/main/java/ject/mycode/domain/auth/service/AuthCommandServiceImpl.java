@@ -16,7 +16,6 @@ import ject.mycode.global.response.ErrorResponseCode;
 import ject.mycode.global.util.NicknameGenerator;
 import ject.mycode.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
