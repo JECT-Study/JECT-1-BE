@@ -7,8 +7,6 @@ import ject.mycode.domain.auth.dto.AuthReq;
 import ject.mycode.domain.auth.dto.AuthRes;
 import ject.mycode.domain.auth.jwt.dto.JwtRes;
 import ject.mycode.domain.auth.service.AuthCommandService;
-import ject.mycode.domain.auth.service.SocialAuthService;
-import ject.mycode.domain.user.converter.UserConverter;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
 import org.springframework.web.bind.annotation.*;
@@ -20,24 +18,11 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthCommandService authCommandService;
-    private final SocialAuthService socialAuthService;
 
-    @Operation(summary = "회원가입", description = "회원가입 기능입니다.")
-    @PostMapping("/signup")
-    public BaseResponse<AuthRes.SignupResultDTO> signup(@RequestBody @Valid AuthReq.SignupDTO request) {
-        return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, UserConverter.toSignupResultDTO(authCommandService.signup(request)));
-    }
-
-    @Operation(summary = "일반 로그인", description = "일반 로그인 기능입니다.")
+    @Operation(summary = "소셜 로그인", description = "소셜 로그인 기능입니다.")
     @PostMapping("/login")
-    public BaseResponse<AuthRes.LoginResultDTO> login(@RequestBody @Valid AuthReq.LoginDTO request) {
+    public BaseResponse<AuthRes.LoginResultDTO> socialLogin(@RequestBody @Valid AuthReq.SocialLoginDTO request) {
         return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, authCommandService.login(request));
-    }
-
-    @Operation(summary = "카카오 로그인", description = "카카오 인가 코드를 입력받아 로그인을 처리합니다.")
-    @PostMapping("/social/kakao")
-    public BaseResponse<AuthRes.LoginResultDTO> kakaoLogin(@Valid @RequestBody AuthReq.SocialLoginDTO request) {
-        return new BaseResponse<>(BaseResponseCode.LOGIN_SUCCESS, socialAuthService.login("kakao", request));
     }
 
     @Operation(summary = "토큰 재발급", description = "accessToken이 만료 시 refreshToken을 통해 accessToken을 재발급합니다.")

@@ -27,11 +27,11 @@ public class PrincipalDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getEmail();
+        return user.getSocialId();
     }
 
     @Override
-    public String getPassword() { return user.getPassword();  }
+    public String getPassword() { return "";  }
 
     @Override
     public boolean isEnabled() {

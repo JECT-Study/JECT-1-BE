@@ -39,10 +39,10 @@ public class JwtFilter extends OncePerRequestFilter {
                 if (blackListValue != null && blackListValue.equals("logout")) {
                     throw new AuthHandler(ErrorResponseCode.TOKEN_LOGGED_OUT);
                 }
-                String email = jwtProvider.getEmail(accessToken);
+                String socialId = jwtProvider.getSocialId(accessToken);
 
                 //유저와 토큰 일치 시 userDetails 생성
-                UserDetails userDetails = principalDetailsService.loadUserByUsername(email);
+                UserDetails userDetails = principalDetailsService.loadUserByUsername(socialId);
                 if (userDetails != null) {
                     //userDetails, password, role -> 접근 권한 인증 Token 생성
                     Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());

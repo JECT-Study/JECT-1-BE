@@ -32,7 +32,7 @@ public class CurrentUserResolver implements HandlerMethodArgumentResolver {
 
         if (authentication != null) {
             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            return userService.getUserByEmail(principalDetails.getUsername());
+            return userService.getUserBySocialId(principalDetails.getUsername());
         }
         return null;
     }

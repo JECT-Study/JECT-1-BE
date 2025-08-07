@@ -53,8 +53,8 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public User getUserByEmail(String email) {
-		return userRepository.findByEmail(email).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
+	public User getUserBySocialId(String SocialId) {
+		return userRepository.findBySocialId(SocialId).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
 	}
 
 //	@Transactional
