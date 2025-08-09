@@ -8,7 +8,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ContentService {
-	Long addFavorite(User user, Long contentId);
+	AddLikeRes addFavorite(User user, Long contentId);
 
 	ContentDetailsRes getContentDetails(User user, Long contentId);
 
@@ -19,4 +19,6 @@ public interface ContentService {
 	List<WeeklyContentRes> getContentsByDate(LocalDate date);
 
 	List<ContentCategoryRes> getSameCategoryContents(ContentType contentType);
+
+	Long deleteFavorite(User user, Long contentId);
 }

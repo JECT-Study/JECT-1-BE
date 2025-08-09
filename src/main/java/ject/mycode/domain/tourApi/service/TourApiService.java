@@ -35,6 +35,7 @@ import java.util.*;
 public class TourApiService {
 
 	@Value("${tour.api.key}")
+
 	private String serviceKey;
 
 	private final RestTemplate restTemplate;

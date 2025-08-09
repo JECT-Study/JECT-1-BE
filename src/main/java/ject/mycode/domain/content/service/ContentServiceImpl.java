@@ -2,7 +2,6 @@ package ject.mycode.domain.content.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.content.enums.ContentType;
@@ -36,7 +35,7 @@ public class ContentServiceImpl implements ContentService {
 
 	@Override
 	@Transactional
-	public Long addFavorite(User user, Long contentId) {
+	public AddLikeRes addFavorite(User user, Long contentId) {
 		Content findContent = contentRepository.findById(contentId)
 			.orElseThrow(() -> new CustomException(BaseResponseCode.CONTENT_NOT_EXIST));
 
@@ -45,7 +44,25 @@ public class ContentServiceImpl implements ContentService {
 			.user(user)
 			.build();
 
-		return favoriteRepository.save(favorite).getId();
+		favoriteRepository.save(favorite);
+
+		long favoriteCount = favoriteRepository.countByContentId(contentId);
+
+		return new AddLikeRes(favorite.getId(), favoriteCount);
+	}
+
+	@Override
+	@Transactional
+	public Long deleteFavorite(User user, Long contentId) {
+		Content findContent = contentRepository.findById(contentId)
+			.orElseThrow(() -> new CustomException(BaseResponseCode.CONTENT_NOT_EXIST));
+
+		Favorite findFavorite = favoriteRepository.findByUserIdAndContentId(user.getId(), contentId)
+			.orElseThrow(() -> new CustomException(BaseResponseCode.FAVORITE_NOT_EXIST));
+
+		favoriteRepository.delete(findFavorite);
+
+		return favoriteRepository.countByContentId(contentId);
 	}
 
 	@Override

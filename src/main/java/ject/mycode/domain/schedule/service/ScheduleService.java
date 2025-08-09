@@ -15,4 +15,6 @@ public interface ScheduleService {
 	Long addSchedule(User user, Long contentId, AddScheduleReq addScheduleReq);
 
 	Page<SchedulesInfoRes> getSchedules(Pageable pageable, LocalDate day);
+
+	void deleteSchedule(User user, Long contentId);
 }

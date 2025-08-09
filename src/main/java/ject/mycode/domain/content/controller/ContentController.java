@@ -1,9 +1,8 @@
 package ject.mycode.domain.content.controller;
 
 import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
-import ject.mycode.domain.content.service.ContentService;
+import ject.mycode.domain.content.dto.AddLikeRes;
 
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import ject.mycode.domain.content.dto.ContentDetailsRes;
@@ -18,19 +17,22 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ContentController{
 
-	private final ContentServiceImpl contentServiceImpl;
-	private final ContentService contentService;
-
+	private final ContentServiceImpl contentService;
 
 	@PostMapping("/{contentId}/favorites")
-	public BaseResponse<Long> addFavorite(@CurrentUser User user, @PathVariable Long contentId){
-		return new BaseResponse<>(BaseResponseCode.ADD_FAVORITE, contentServiceImpl.addFavorite(user, contentId));
+	public BaseResponse<AddLikeRes> addFavorite(@CurrentUser User user, @PathVariable Long contentId){
+		return new BaseResponse<>(BaseResponseCode.ADD_FAVORITE, contentService.addFavorite(user, contentId));
+	}
+
+	@DeleteMapping("/{contentId}/favorites")
+	public BaseResponse<Long> removeFavorite(@CurrentUser User user, @PathVariable Long contentId){
+		return new BaseResponse<>(BaseResponseCode.REMOVE_FAVORITE, contentService.deleteFavorite(user, contentId));
 	}
 
 	@GetMapping("/{contentId}")
 	public BaseResponse<ContentDetailsRes> getContentDetails(@CurrentUser User user,
 		@PathVariable Long contentId) {
 		return new BaseResponse<>(BaseResponseCode.GET_CONTENT_DETAILS,
-			contentServiceImpl.getContentDetails(user, contentId));
+			contentService.getContentDetails(user, contentId));
 	}
 }

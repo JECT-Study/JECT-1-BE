@@ -20,6 +20,7 @@ public enum BaseResponseCode {
 	GET_HOT_CONTENT(true, 1103, "핫한 콘텐츠를 불러옵니다.", HttpStatus.OK),
 	GET_WEEKLY_CONTENT(true, 1103, "금주 콘텐츠를 불러옵니다.", HttpStatus.OK),
 	GET_SAME_CATEGORY_CONTENT(true, 1104, "카테고리별 콘텐츠를 불러옵니다.", HttpStatus.OK),
+	REMOVE_FAVORITE(true, 1105, "관심목록에서 제거했습니다.", HttpStatus.OK),
 
 	// 1200 ~ 1299 : 일정 관련
 	ADD_MY_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),
@@ -29,6 +30,7 @@ public enum BaseResponseCode {
 	GET_FAVORITES(true, 1300, "관심목록을 불러옵니다.", HttpStatus.OK),
 	GET_MY_SCHEDULES(true, 1301, "나의 일정을 불러옵니다.", HttpStatus.OK),
 	GET_SCHEDULED_DATES(true, 1302, "일정이 있는 날짜들을 불러옵니다.", HttpStatus.OK),
+	DELETE_MY_SCHEDULE(true, 1303, "나의 일정을 삭제합니다.", HttpStatus.OK),
 
 	//1400 ~ 1499 설문 관련
 	SAVE_ANSWER_SUCCESS(true, 1400, "설문이 완료되었습니다.", HttpStatus.CREATED),
@@ -40,10 +42,12 @@ public enum BaseResponseCode {
 
 	// 2100 ~ 2199 : 컨텐츠 관련
 	CONTENT_NOT_EXIST(false, 2100, "존재하지 않는 컨텐츠입니다.", HttpStatus.NOT_FOUND),
+	FAVORITE_NOT_EXIST(false, 2101, "존재하지 않는 즐겨찾기입니다.", HttpStatus.NOT_FOUND),
 
 	//2200 ~ 2299 : 일정 관련
 
 	VALIDATION_FAILED(false, 2999, "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
+	SCHEDULE_NOT_EXIST(false, 2200, "해당 일정이 없습니다.", HttpStatus.NOT_FOUND),
 
 	// 2300~2399 : 검색 관련
 	SEARCH_SUCCESS(true, 2300, "컨텐츠를 검색합니다.", HttpStatus.OK),
