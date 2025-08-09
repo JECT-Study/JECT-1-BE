@@ -45,6 +45,15 @@ public class ScheduleServiceImpl implements ScheduleService {
 	}
 
 	@Override
+	public void deleteSchedule(User user, Long contentId) {
+		Schedule findSchedule = scheduleRepository.findByUserIdAndContentId(user.getId(), contentId)
+			.orElseThrow(() -> new CustomException(BaseResponseCode.SCHEDULE_NOT_EXIST));
+
+		scheduleRepository.delete(findSchedule);
+		return;
+	}
+
+	@Override
 	@Transactional(readOnly = true)
 	public Page<SchedulesInfoRes> getSchedules(Pageable pageable, LocalDate day) {
 		return contentQueryRepository.findSchedulesByDate(pageable, day);

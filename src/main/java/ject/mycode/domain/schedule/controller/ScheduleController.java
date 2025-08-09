@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -37,6 +38,12 @@ public class ScheduleController {
 
 		return new BaseResponse<>(BaseResponseCode.ADD_MY_SCHEDULE_SUCCESS,
 			scheduleService.addSchedule(user, contentId, addScheduleReq));
+	}
+
+	@DeleteMapping("/contents/{contentId}/my-schedules")
+	public BaseResponse<Void> deleteSchedule(@CurrentUser User user, @PathVariable Long contentId) {
+		scheduleService.deleteSchedule(user, contentId);
+		return new BaseResponse<>(BaseResponseCode.DELETE_MY_SCHEDULE);
 	}
 
 	@GetMapping("/schedules")

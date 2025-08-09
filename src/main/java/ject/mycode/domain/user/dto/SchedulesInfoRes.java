@@ -10,6 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SchedulesInfoRes {
+	// TODO : contentID 말고 ScheduleID로 대체
 	private Long contentId;
 	private String title;
 	private String image;
