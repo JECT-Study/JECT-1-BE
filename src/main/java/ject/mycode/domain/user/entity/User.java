@@ -41,7 +41,7 @@ public class User extends BaseEntity {
 	private UserRole role;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "region_id")
+	@JoinColumn(name = "region_id", nullable = false)
 	private Region region;
 
 	public void changeProfileImage(String image) {

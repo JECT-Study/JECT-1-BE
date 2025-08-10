@@ -1,12 +1,12 @@
 package ject.mycode.domain.home.controller;
 
 
-import ject.mycode.domain.content.dto.ContentCategoryRes;
-import ject.mycode.domain.content.dto.ContentRecommendRes;
-import ject.mycode.domain.content.dto.HotContentRes;
-import ject.mycode.domain.content.dto.WeeklyContentRes;
+import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
+import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.content.service.ContentService;
+import ject.mycode.domain.user.entity.User;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +55,13 @@ public class HomeController{
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_SAME_CATEGORY_CONTENT,
                 contentService.getSameCategoryContents(contentType));
+    }
+
+    @GetMapping("/festival/recommend")
+    public BaseResponse<List<ContentRegionRes>> getRecommendedFestivals(@CurrentUser User user) {
+        Long userId = Long.valueOf(user.getId());
+        return new BaseResponse<>(BaseResponseCode.GET_RECOMMENDED_REGION_CONTENT,
+                contentService.getRecommendedContents(userId));
     }
 }
 
