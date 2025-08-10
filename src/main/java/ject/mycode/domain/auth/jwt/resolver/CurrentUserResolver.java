@@ -31,9 +31,15 @@ public class CurrentUserResolver implements HandlerMethodArgumentResolver {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication != null) {
-            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
-            return userService.getUserBySocialId(principalDetails.getUsername());
+            Object principal = authentication.getPrincipal();
+
+            if (principal instanceof PrincipalDetails principalDetails) {
+                return userService.getUserBySocialId(principalDetails.getUsername());
+            } else {
+                log.warn("CurrentUserResolver - principal is not PrincipalDetails: {}", principal);
+            }
         }
         return null;
     }
+
 }

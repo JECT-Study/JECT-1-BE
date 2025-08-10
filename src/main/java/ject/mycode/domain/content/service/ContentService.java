@@ -21,4 +21,6 @@ public interface ContentService {
 	List<ContentCategoryRes> getSameCategoryContents(ContentType contentType);
 
 	Long deleteFavorite(User user, Long contentId);
+
+	List<ContentRegionRes> getRecommendedContents(Long userId);
 }
