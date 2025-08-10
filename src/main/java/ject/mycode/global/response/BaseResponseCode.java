@@ -31,6 +31,7 @@ public enum BaseResponseCode {
 	GET_MY_SCHEDULES(true, 1301, "나의 일정을 불러옵니다.", HttpStatus.OK),
 	GET_SCHEDULED_DATES(true, 1302, "일정이 있는 날짜들을 불러옵니다.", HttpStatus.OK),
 	DELETE_MY_SCHEDULE(true, 1303, "나의 일정을 삭제합니다.", HttpStatus.OK),
+	CHANGE_PROFILE_SUCCESS(true, 1304, "프로필을 수정했습니다.", HttpStatus.OK),
 
 	//1400 ~ 1499 설문 관련
 	SAVE_ANSWER_SUCCESS(true, 1400, "설문이 완료되었습니다.", HttpStatus.CREATED),
@@ -39,6 +40,7 @@ public enum BaseResponseCode {
 	SAVE_CONTENT_INFO(true, 1900, "컨텐츠 정보를 api로 불러와서 저장했습니다.", HttpStatus.CREATED),
 
 	// 2000번대 : 클라이언트 오류
+	DUPLICATED_NICKNAME(false, 2001, "이미 존재하는 닉네임입니다.", HttpStatus.CONFLICT),
 
 	// 2100 ~ 2199 : 컨텐츠 관련
 	CONTENT_NOT_EXIST(false, 2100, "존재하지 않는 컨텐츠입니다.", HttpStatus.NOT_FOUND),

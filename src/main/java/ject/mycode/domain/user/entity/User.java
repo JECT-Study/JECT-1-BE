@@ -43,4 +43,12 @@ public class User extends BaseEntity {
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "region_id")
 	private Region region;
+
+	public void changeProfileImage(String image) {
+		this.image = image;
+	}
+
+	public void changeNickname(String nickname) {
+		this.nickname = nickname;
+	}
 }

@@ -10,13 +10,17 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.domain.user.service.UserServiceImpl;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
@@ -26,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
 	private final UserServiceImpl userService;
+	private final UserRepository userRepository;
 
 	@GetMapping("/users/favorites")
 	public BaseResponse<Page<FavoritesRes>> getUserFavorites(@CurrentUser User user,
@@ -54,5 +59,13 @@ public class UserController {
 		@RequestParam @DateTimeFormat(pattern = "yyyy-MM") YearMonth month
 	) {
 		return new BaseResponse<>(BaseResponseCode.GET_SCHEDULED_DATES, userService.getDaysWithSchedules(user, month));
+	}
+
+	@PatchMapping("/users/profile")
+	public BaseResponse<Void> changeUserProfile(@CurrentUser User user,
+		@RequestPart(value = "image", required = false) MultipartFile image,
+		@RequestPart("nickname") String nickname) {
+		userService.changeUserProfile(user, image, nickname);
+		return new BaseResponse<>(BaseResponseCode.CHANGE_PROFILE_SUCCESS);
 	}
 }
