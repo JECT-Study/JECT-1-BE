@@ -21,6 +21,7 @@ public enum BaseResponseCode {
 	GET_WEEKLY_CONTENT(true, 1103, "금주 콘텐츠를 불러옵니다.", HttpStatus.OK),
 	GET_SAME_CATEGORY_CONTENT(true, 1104, "카테고리별 콘텐츠를 불러옵니다.", HttpStatus.OK),
 	REMOVE_FAVORITE(true, 1105, "관심목록에서 제거했습니다.", HttpStatus.OK),
+	GET_RECOMMENDED_REGION_CONTENT(true, 1106, "사용자 지역 기반 콘텐츠를 추천합니다.", HttpStatus.OK),
 
 	// 1200 ~ 1299 : 일정 관련
 	ADD_MY_SCHEDULE_SUCCESS(true, 1200, "내 일정에 추가했습니다.", HttpStatus.CREATED),

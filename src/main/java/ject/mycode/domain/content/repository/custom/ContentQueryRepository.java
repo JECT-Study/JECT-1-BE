@@ -1,7 +1,6 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
-import java.util.Collection;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.*;
@@ -30,4 +29,6 @@ public interface ContentQueryRepository {
 	List<ContentCategoryRes> findContentsByCategory(ContentType contentType);
 
 	Page<SchedulesInfoRes> findSchedulesByDate(Pageable pageable, LocalDate day);
+
+	List<ContentRegionRes> findRecommendedByUserRegion(Long userId);
 }

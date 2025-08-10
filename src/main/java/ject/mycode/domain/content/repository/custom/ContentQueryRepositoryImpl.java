@@ -5,6 +5,8 @@ import java.util.Collections;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.region.dto.RegionRes;
+import ject.mycode.domain.user.entity.QUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -27,6 +29,8 @@ import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.enums.ContentStatus;
 import lombok.RequiredArgsConstructor;
+
+import static ject.mycode.domain.region.entity.QRegion.region;
 
 @Repository
 @RequiredArgsConstructor
@@ -362,4 +366,40 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
+
+	@Override
+	public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
+		// 서브쿼리로 사용자 지역 ID 조회
+		QUser userSub = new QUser("userSub");
+
+		return qf.select(Projections.constructor(
+						ContentRegionRes.class,
+						content.id,
+						content.title,
+						content.address,
+						// 대표 이미지 서브쿼리 (예: contentImage가 있다면)
+						JPAExpressions.select(contentImageSub.imageUrl)
+								.from(contentImageSub)
+								.where(contentImageSub.content.eq(content))
+								.orderBy(contentImageSub.id.asc())
+								.limit(1),
+						content.startDate.stringValue(),
+						content.endDate.stringValue(),
+						Projections.constructor(
+								RegionRes.class,
+								region.id,
+								region.name
+						)
+				))
+				.from(content)
+				.join(content.region, region)
+				// content.region.id가 사용자 지역 ID와 같은 것만 필터링
+				.where(region.id.eq(
+						JPAExpressions.select(userSub.region.id)
+								.from(userSub)
+								.where(userSub.id.eq(userId))
+				))
+				.fetch();
+	}
+
 }

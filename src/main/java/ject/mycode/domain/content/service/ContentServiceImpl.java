@@ -17,7 +17,6 @@ import ject.mycode.domain.favorite.entity.Favorite;
 import ject.mycode.domain.favorite.repository.FavoriteRepository;
 import ject.mycode.domain.tag.repository.contentTagRepo.ContentTagRepository;
 import ject.mycode.domain.user.entity.User;
-import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponseCode;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +30,6 @@ public class ContentServiceImpl implements ContentService {
 	private final ContentQueryRepositoryImpl contentQueryRepository;
 	private final ContentImageRepository contentImageRepository;
 	private final ContentTagRepository contentTagRepository;
-	private final UserRepository userRepository;
 
 	@Override
 	@Transactional
@@ -108,5 +106,10 @@ public class ContentServiceImpl implements ContentService {
 	@Override
 	public List<ContentCategoryRes> getSameCategoryContents(ContentType contentType) {
 		return contentQueryRepository.findContentsByCategory(contentType);
+	}
+
+
+	public List<ContentRegionRes> getRecommendedContents(Long userId) {
+		return contentQueryRepository.findRecommendedByUserRegion(userId);
 	}
 }
