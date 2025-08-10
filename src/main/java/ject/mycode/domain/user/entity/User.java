@@ -51,4 +51,8 @@ public class User extends BaseEntity {
 	public void changeNickname(String nickname) {
 		this.nickname = nickname;
 	}
+
+	public void saveRecommendRegion(Region region) {
+		this.region = region;
+	}
 }

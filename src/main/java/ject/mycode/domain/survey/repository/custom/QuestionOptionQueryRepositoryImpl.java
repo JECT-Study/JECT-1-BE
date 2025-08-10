@@ -1,5 +1,7 @@
 package ject.mycode.domain.survey.repository.custom;
 
+import static ject.mycode.domain.survey.dto.SurveyAnswerReq.*;
+
 import java.util.List;
 
 import org.springframework.stereotype.Repository;
@@ -22,10 +24,10 @@ public class QuestionOptionQueryRepositoryImpl implements QuestionOptionQueryRep
 	private final QSurveyQuestion surveyQuestion = QSurveyQuestion.surveyQuestion;
 
 	@Override
-	public List<QuestionOption> findAllByQuestionIdAndOptionOrder(List<SurveyAnswerReq> answers) {
+	public List<QuestionOption> findAllByQuestionIdAndOptionOrder(List<AnswerPair> answers) {
 		BooleanBuilder condition = new BooleanBuilder();
 
-		for (SurveyAnswerReq answer : answers) {
+		for (AnswerPair answer : answers) {
 			condition.or(
 				questionOption.surveyQuestion.id.eq(answer.getQuestionId())
 					.and(questionOption.questionOptionOrder.eq(answer.getOptionId().intValue()))
