@@ -1,4 +1,9 @@
 spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   datasource:
     url: ${DB_URL}
     username: ${DB_USER}
@@ -31,4 +36,14 @@ spring:
 
 tour:
   api:
-    key: gI%2BhY2LiIvLCkvYaTjeY1x%2Fg2ugYakTaR%2F0CrDUKAHrte%2FpH674xBkvgKaWDGeA1v0u3%2BYelFSXsW3vOu33Fcg%3D%3D
+    key: ${OPEN_API_KEY}
+
+cloud:
+  aws:
+    credentials:
+      accessKey: ${AWS_ACCESS_KEY}
+      secretKey: ${AWS_SECRET_KEY}
+    region:
+      static: ap-northeast-2
+    s3:
+      bucketName: ${BUCKET_NAME}

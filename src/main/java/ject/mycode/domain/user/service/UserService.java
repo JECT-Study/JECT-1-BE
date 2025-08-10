@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
@@ -17,4 +18,5 @@ public interface UserService {
 	Page<SchedulesInfoRes> getMySchedules(User user, LocalDate day, Pageable pageable);
 	List<LocalDate> getDaysWithSchedules(User user, YearMonth month);
 	User getUserBySocialId(String SocialId);
+	void changeUserProfile(User user, MultipartFile image, String nickname);
 }

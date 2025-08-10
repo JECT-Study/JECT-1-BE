@@ -3,26 +3,39 @@ package ject.mycode.domain.user.service;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
+import java.util.Objects;
+
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
+import ject.mycode.global.exception.CustomException;
+import ject.mycode.global.exception.GlobalExceptionHandler;
+import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.response.ErrorResponseCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.content.repository.custom.ContentQueryRepositoryImpl;
 import ject.mycode.domain.user.dto.SchedulesInfoRes;
 import ject.mycode.domain.user.entity.User;
+import ject.mycode.global.s3.S3ImageService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 	private final ContentQueryRepositoryImpl contentQueryRepository;
 	private final UserRepository userRepository;
+	private final S3ImageService s3Service;
 
 	@Override
 	@Transactional(readOnly = true)
@@ -57,7 +70,46 @@ public class UserServiceImpl implements UserService {
 		return userRepository.findBySocialId(SocialId).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
 	}
 
-//	@Transactional
+	@Override
+	@Transactional
+	public void changeUserProfile(User user, MultipartFile image, String nickname) {
+		// 1) 이미지 업로드 (있을 때만)
+		String oldUrl = user.getImage();
+		String newUrl = null;
+		boolean uploadedNewImage = false;
+
+		if (image != null && !image.isEmpty()) {
+			// 1) 이미지 변경
+			newUrl = s3Service.upload(image);
+			uploadedNewImage = true;
+			user.changeProfileImage(newUrl);
+		}
+
+		// 2) 닉네임 변경
+		if (org.springframework.util.StringUtils.hasText(nickname)) {
+			String trimmed = nickname.trim();
+
+			// 현재 닉네임과 다른 경우에만 중복 검사
+			if (!trimmed.equals(user.getNickname())
+				&& userRepository.existsByNicknameAndIdNot(trimmed, user.getId())) {
+				throw new CustomException(BaseResponseCode.DUPLICATED_NICKNAME);
+			}
+			user.changeNickname(trimmed);
+		}
+
+		// 4) "기존 이미지" 삭제 (신규 업로드가 있었고 URL이 바뀐 경우)
+		if (uploadedNewImage && oldUrl != null && !Objects.equals(oldUrl, newUrl)) {
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCommit() {
+					try { s3Service.deleteImageFromS3(oldUrl); }
+					catch (Exception ex) { log.warn("커밋후 기존 이미지 삭제 실패: {}", oldUrl, ex); }
+				}
+			});
+		}
+	}
+
+	//	@Transactional
 //	public Long createUser(KakaoUserRes userResponse) {
 //		String email = userResponse.kakaoAccount().email();
 //
