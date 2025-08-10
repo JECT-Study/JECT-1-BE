@@ -42,6 +42,7 @@ public enum BaseResponseCode {
 
 	// 2000번대 : 클라이언트 오류
 	DUPLICATED_NICKNAME(false, 2001, "이미 존재하는 닉네임입니다.", HttpStatus.CONFLICT),
+	REGION_NOT_EXIST(false, 2002, "존재하지 않는 지역입니다.", HttpStatus.NOT_FOUND),
 
 	// 2100 ~ 2199 : 컨텐츠 관련
 	CONTENT_NOT_EXIST(false, 2100, "존재하지 않는 컨텐츠입니다.", HttpStatus.NOT_FOUND),

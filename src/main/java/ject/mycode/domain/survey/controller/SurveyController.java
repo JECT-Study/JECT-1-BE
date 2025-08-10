@@ -23,7 +23,7 @@ public class SurveyController {
 
 	@PostMapping("/trait-test")
 	public BaseResponse<Void> saveTraitTestResult(@CurrentUser User user,
-		@RequestBody List<SurveyAnswerReq> answerDto) {
+		@RequestBody SurveyAnswerReq answerDto) {
 		surveyService.saveTraitTestResult(user, answerDto);
 		return new BaseResponse<>(BaseResponseCode.SAVE_ANSWER_SUCCESS);
 	}
