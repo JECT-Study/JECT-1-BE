@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import ject.mycode.domain.content.dto.*;
-import ject.mycode.domain.region.dto.RegionRes;
 import ject.mycode.domain.user.entity.QUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -384,12 +383,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 								.orderBy(contentImageSub.id.asc())
 								.limit(1),
 						content.startDate.stringValue(),
-						content.endDate.stringValue(),
-						Projections.constructor(
-								RegionRes.class,
-								region.id,
-								region.name
-						)
+						content.endDate.stringValue()
 				))
 				.from(content)
 				.join(content.region, region)
