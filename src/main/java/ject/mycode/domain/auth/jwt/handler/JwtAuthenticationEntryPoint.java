@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ject.mycode.global.response.BaseResponse;
-import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.response.BaseResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
@@ -24,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
 
         BaseResponse<Object> errorResponse = new BaseResponse<>(
-                ErrorResponseCode.UNAUTHORIZED,
+                BaseResponseCode.UNAUTHORIZED,
                 authException.getMessage()
         );
 

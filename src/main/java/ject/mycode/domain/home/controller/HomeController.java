@@ -26,18 +26,17 @@ public class HomeController{
 
     @GetMapping("/recommendations")
     public BaseResponse<List<ContentRecommendRes>> getRecommendedContents(
-            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
+            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType,
+            @CurrentUser User user
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_RECOMMENDED_CONTENT,
                 contentService.getRecommendedContents(contentType));
     }
 
     @GetMapping("/festival/hot")
-    public BaseResponse<List<HotContentRes>> getHotContents(
-            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
-    ) {
+    public BaseResponse<List<HotContentRes>> getHotContents() {
         return new BaseResponse<>(BaseResponseCode.GET_HOT_CONTENT,
-                contentService.getHotContents(contentType));
+                contentService.getHotContents());
     }
 
     @GetMapping("/contents/week")
@@ -51,7 +50,8 @@ public class HomeController{
 
     @GetMapping("/category")
     public BaseResponse<List<ContentCategoryRes>> getSameCategoryContents(
-            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
+            @RequestParam(value = "category", required = false) ContentType contentType,
+            @CurrentUser User user
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_SAME_CATEGORY_CONTENT,
                 contentService.getSameCategoryContents(contentType));

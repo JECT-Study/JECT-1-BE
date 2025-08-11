@@ -14,7 +14,7 @@ public interface ContentService {
 
 	List<ContentRecommendRes> getRecommendedContents(ContentType contentType);
 
-	List<HotContentRes> getHotContents(ContentType contentType);
+	List<HotContentRes> getHotContents();
 
 	List<WeeklyContentRes> getContentsByDate(LocalDate date);
 

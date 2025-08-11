@@ -8,16 +8,13 @@ import java.util.Objects;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.exception.CustomException;
-import ject.mycode.global.exception.GlobalExceptionHandler;
 import ject.mycode.global.response.BaseResponseCode;
-import ject.mycode.global.response.ErrorResponseCode;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import ject.mycode.domain.content.dto.FavoritesRes;
@@ -67,7 +64,7 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User getUserBySocialId(String SocialId) {
-		return userRepository.findBySocialId(SocialId).orElseThrow(() -> new AuthHandler(ErrorResponseCode.USER_NOT_FOUND));
+		return userRepository.findBySocialId(SocialId).orElseThrow(() -> new AuthHandler(BaseResponseCode.USER_NOT_FOUND));
 	}
 
 	@Override

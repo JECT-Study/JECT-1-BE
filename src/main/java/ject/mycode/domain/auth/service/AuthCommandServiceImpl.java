@@ -12,7 +12,7 @@ import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
-import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.util.NicknameGenerator;
 import ject.mycode.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
@@ -69,9 +69,9 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             jwtProvider.validateRefreshToken(refreshToken);
             return jwtProvider.reissueToken(refreshToken);
         } catch (ExpiredJwtException eje) {
-            throw new AuthHandler(ErrorResponseCode.TOKEN_EXPIRED);
+            throw new AuthHandler(BaseResponseCode.TOKEN_EXPIRED);
         } catch (IllegalArgumentException iae) {
-            throw new AuthHandler(ErrorResponseCode.INVALID_TOKEN);
+            throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
         }
     }
 
@@ -85,7 +85,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             // RefreshToken 삭제
             redisUtil.delete(jwtProvider.getSocialId(accessToken));
         } catch (ExpiredJwtException e) {
-            throw new AuthHandler(ErrorResponseCode.TOKEN_EXPIRED);
+            throw new AuthHandler(BaseResponseCode.TOKEN_EXPIRED);
         }
     }
 }

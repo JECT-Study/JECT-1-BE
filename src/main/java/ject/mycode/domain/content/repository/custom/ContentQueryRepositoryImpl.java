@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
+import com.querydsl.core.types.dsl.CaseBuilder;
+import com.querydsl.core.types.dsl.NumberExpression;
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.user.entity.QUser;
 import org.springframework.data.domain.Page;
@@ -206,6 +208,12 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 
 	@Override
 	public List<ContentRecommendRes> findRecommendedContents(ContentType contentType) {
+		LocalDate today = LocalDate.now();
+
+		NumberExpression<Integer> statusOrder = new CaseBuilder()
+				.when(content.endDate.goe(today)).then(0)
+				.otherwise(1);
+
 		return qf
 				.select(Projections.constructor(
 						ContentRecommendRes.class,
@@ -226,6 +234,11 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				))
 				.from(content)
 				.where(content.contentType.eq(contentType))
+				.orderBy(
+						statusOrder.asc(),
+						content.endDate.asc(),
+						content.startDate.asc()
+				)
 				.fetch();
   }
   
@@ -242,10 +255,15 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	}
 
 	@Override
-	public List<HotContentRes> findHotContentsThisMonth(ContentType contentType) {
+	public List<HotContentRes> findHotContentsThisMonth() {
 		LocalDate now = LocalDate.now();
 		LocalDate firstDay = now.withDayOfMonth(1);
 		LocalDate lastDay = now.withDayOfMonth(now.lengthOfMonth());
+
+		LocalDate today = LocalDate.now();
+		NumberExpression<Integer> statusOrder = new CaseBuilder()
+				.when(content.endDate.goe(today)).then(0)
+				.otherwise(1);
 
 		return qf.select(Projections.constructor(
 						HotContentRes.class,
@@ -265,14 +283,23 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.stringValue()
 				))
 				.from(content)
-				.where(content.contentType.eq(contentType)
-						.and(content.startDate.goe(firstDay))
+				.where(content.startDate.goe(firstDay)
 						.and(content.endDate.loe(lastDay)))
+				.orderBy(
+						statusOrder.asc(),
+						content.endDate.asc(),
+						content.startDate.asc()
+				)
 				.fetch();
 	}
 
 	@Override
 	public List<WeeklyContentRes> findContentsByDate(LocalDate date) {
+		LocalDate today = LocalDate.now();
+		NumberExpression<Integer> statusOrder = new CaseBuilder()
+				.when(content.endDate.goe(today)).then(0)
+				.otherwise(1);
+
 		return qf
 				.select(Projections.constructor(
 						WeeklyContentRes.class,
@@ -288,11 +315,22 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				.where(content.startDate.loe(date)
 						.and(content.endDate.goe(date)))
 				.groupBy(content.id, content.title, content.address, content.startDate, content.endDate)
+				.orderBy(
+						statusOrder.asc(),
+						content.endDate.asc(),
+						content.startDate.asc()
+				)
 				.fetch();
 	}
 
 	@Override
 	public List<ContentCategoryRes> findContentsByCategory(ContentType contentType) {
+		LocalDate today = LocalDate.now();
+
+		NumberExpression<Integer> statusOrder = new CaseBuilder()
+				.when(content.endDate.after(today).or(content.endDate.eq(today))).then(0) // 진행중
+				.otherwise(1); // 진행완료
+
 		return qf
 				.select(Projections.constructor(
 						ContentCategoryRes.class,
@@ -306,7 +344,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				))
 				.from(content)
 				.leftJoin(contentImage).on(contentImage.content.eq(content))
-				.where(content.contentType.eq(contentType))
+				.where(contentType != null ? content.contentType.eq(contentType) : null) // contentType 없으면 전체 조회
 				.groupBy(
 						content.id,
 						content.title,
@@ -314,6 +352,11 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.latitude,
 						content.startDate,
 						content.endDate
+				)
+				.orderBy(
+						statusOrder.asc(), // 1차: 진행중 먼저
+						content.endDate.asc(), // 2차: 종료일 빠른 순
+						content.startDate.asc() // 3차: 시작일 빠른 순 (동일 종료일일 경우)
 				)
 				.fetch();
 	}
@@ -368,6 +411,11 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 
 	@Override
 	public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
+		LocalDate today = LocalDate.now();
+		NumberExpression<Integer> statusOrder = new CaseBuilder()
+				.when(content.endDate.goe(today)).then(0)
+				.otherwise(1);
+
 		// 서브쿼리로 사용자 지역 ID 조회
 		QUser userSub = new QUser("userSub");
 
@@ -393,6 +441,11 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 								.from(userSub)
 								.where(userSub.id.eq(userId))
 				))
+				.orderBy(
+						statusOrder.asc(),
+						content.endDate.asc(),
+						content.startDate.asc()
+				)
 				.fetch();
 	}
 

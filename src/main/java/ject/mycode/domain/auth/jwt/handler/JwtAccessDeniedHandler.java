@@ -1,11 +1,10 @@
 package ject.mycode.domain.auth.jwt.handler;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ject.mycode.global.response.BaseResponse;
-import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.response.BaseResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -26,7 +25,7 @@ public class JwtAccessDeniedHandler implements AccessDeniedHandler {
         response.setStatus(HttpStatus.FORBIDDEN.value());
 
         BaseResponse<Object> errorResponse = new BaseResponse<>(
-                ErrorResponseCode.FORBIDDEN,  // 예: BaseResponseCode에 FORBIDDEN이 있다고 가정
+                BaseResponseCode.FORBIDDEN,
                 accessDeniedException.getMessage()
         );
 

@@ -8,7 +8,6 @@ import ject.mycode.domain.search.service.SearchService;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.global.response.BaseResponse;
 import ject.mycode.global.response.BaseResponseCode;
-import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +29,7 @@ public class SearchController {
             @CurrentUser User user
     ) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new BaseResponse<>(ErrorResponseCode.SEARCH_KEYWORD_MISSING);
+            return new BaseResponse<>(BaseResponseCode.SEARCH_KEYWORD_MISSING);
         }
 
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);
@@ -53,10 +52,6 @@ public class SearchController {
 
     @DeleteMapping("/keywords")
     public BaseResponse<?> deleteAllKeywords(@CurrentUser User user) {
-//        if (user == null) {
-//            throw new CustomException(BaseResponseCode.USER_NOT_AUTHENTICATED);
-//        }
-
         searchService.deleteAllKeywords(user);
         return new BaseResponse<>(BaseResponseCode.DELETE_ALL_SUCCESS);
     }

@@ -8,8 +8,8 @@ import ject.mycode.domain.auth.jwt.dto.JwtRes;
 import ject.mycode.domain.auth.jwt.userdetails.PrincipalDetails;
 import ject.mycode.domain.auth.jwt.userdetails.PrincipalDetailsService;
 import ject.mycode.global.exception.AuthHandler;
+import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.util.RedisUtil;
-import ject.mycode.global.response.ErrorResponseCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -106,7 +106,7 @@ public class JwtProvider {
 
         //redis 확인
         if (!redisUtil.exists(username)) {
-            throw new AuthHandler(ErrorResponseCode.INVALID_TOKEN);
+            throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
         }
     }
 
@@ -125,7 +125,7 @@ public class JwtProvider {
                     .build()
                     .parseClaimsJws(token);
         } catch (Exception e) {
-            throw new AuthHandler(ErrorResponseCode.INVALID_TOKEN);
+            throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
         }
     }
 

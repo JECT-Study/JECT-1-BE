@@ -22,7 +22,7 @@ public interface ContentQueryRepository {
   
 	List<LocalDate> findContentsByUserIdAndDateRange(Long id, LocalDate start, LocalDate end);
 
-	List<HotContentRes> findHotContentsThisMonth(ContentType contentType);
+	List<HotContentRes> findHotContentsThisMonth();
 
 	List<WeeklyContentRes> findContentsByDate(LocalDate date);
 

@@ -1,9 +1,9 @@
 package ject.mycode.global.exception;
 
-import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.response.BaseResponseCode;
 
 public class AuthHandler extends RuntimeException{
-    public AuthHandler(ErrorResponseCode errorCode) {
+    public AuthHandler(BaseResponseCode errorCode) {
         super(errorCode.getMessage());
     }
 }
