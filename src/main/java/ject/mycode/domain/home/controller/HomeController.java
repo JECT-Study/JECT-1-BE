@@ -26,7 +26,8 @@ public class HomeController{
 
     @GetMapping("/recommendations")
     public BaseResponse<List<ContentRecommendRes>> getRecommendedContents(
-            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
+            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType,
+            @CurrentUser User user
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_RECOMMENDED_CONTENT,
                 contentService.getRecommendedContents(contentType));

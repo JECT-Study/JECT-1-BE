@@ -30,8 +30,7 @@ public class ContentController{
 	}
 
 	@GetMapping("/{contentId}")
-	public BaseResponse<ContentDetailsRes> getContentDetails(@CurrentUser User user,
-		@PathVariable Long contentId) {
+	public BaseResponse<ContentDetailsRes> getContentDetails(@CurrentUser User user, @PathVariable Long contentId) {
 		return new BaseResponse<>(BaseResponseCode.GET_CONTENT_DETAILS,
 			contentService.getContentDetails(user, contentId));
 	}
