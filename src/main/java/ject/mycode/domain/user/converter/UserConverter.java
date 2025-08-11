@@ -9,8 +9,8 @@ public class UserConverter {
                 .id(user.getId())
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
+                .image(user.getImage())
+                .nickname(user.getNickname())
                 .build();
-
     }
-
 }
