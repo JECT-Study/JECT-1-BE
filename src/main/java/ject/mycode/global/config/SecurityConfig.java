@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 "/auth/login/kakao/**",
                                 "/auth/**"
                         ).permitAll()
-                        .requestMatchers("/api/auth/**", "/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/**", "/aws").permitAll()
                         .anyRequest().authenticated())
                         //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
                         .addFilterBefore(new JwtFilter(jwtProvider, redisUtil, principalDetailsService), UsernamePasswordAuthenticationFilter.class)
