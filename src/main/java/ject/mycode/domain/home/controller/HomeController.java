@@ -33,11 +33,9 @@ public class HomeController{
     }
 
     @GetMapping("/festival/hot")
-    public BaseResponse<List<HotContentRes>> getHotContents(
-            @RequestParam(value = "category", defaultValue = "PERFORMANCE") ContentType contentType
-    ) {
+    public BaseResponse<List<HotContentRes>> getHotContents() {
         return new BaseResponse<>(BaseResponseCode.GET_HOT_CONTENT,
-                contentService.getHotContents(contentType));
+                contentService.getHotContents());
     }
 
     @GetMapping("/contents/week")

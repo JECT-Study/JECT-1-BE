@@ -242,7 +242,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	}
 
 	@Override
-	public List<HotContentRes> findHotContentsThisMonth(ContentType contentType) {
+	public List<HotContentRes> findHotContentsThisMonth() {
 		LocalDate now = LocalDate.now();
 		LocalDate firstDay = now.withDayOfMonth(1);
 		LocalDate lastDay = now.withDayOfMonth(now.lengthOfMonth());
@@ -265,8 +265,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.stringValue()
 				))
 				.from(content)
-				.where(content.contentType.eq(contentType)
-						.and(content.startDate.goe(firstDay))
+				.where(content.startDate.goe(firstDay)
 						.and(content.endDate.loe(lastDay)))
 				.fetch();
 	}

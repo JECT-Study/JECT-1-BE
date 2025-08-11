@@ -94,8 +94,8 @@ public class ContentServiceImpl implements ContentService {
 	}
 
 	@Override
-	public List<HotContentRes> getHotContents(ContentType contentType) {
-		return contentQueryRepository.findHotContentsThisMonth(contentType);
+	public List<HotContentRes> getHotContents() {
+		return contentQueryRepository.findHotContentsThisMonth();
 	}
 
 	@Override
