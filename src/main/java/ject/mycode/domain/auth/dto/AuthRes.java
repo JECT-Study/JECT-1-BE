@@ -15,5 +15,7 @@ public class AuthRes {
         Long id;
         String accessToken;
         String refreshToken;
+        String image;
+        String nickname;
     }
 }
