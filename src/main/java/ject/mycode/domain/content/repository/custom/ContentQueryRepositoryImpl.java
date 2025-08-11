@@ -305,7 +305,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				))
 				.from(content)
 				.leftJoin(contentImage).on(contentImage.content.eq(content))
-				.where(content.contentType.eq(contentType))
+				.where(contentType != null ? content.contentType.eq(contentType) : null) // contentType 없으면 전체 조회
 				.groupBy(
 						content.id,
 						content.title,
