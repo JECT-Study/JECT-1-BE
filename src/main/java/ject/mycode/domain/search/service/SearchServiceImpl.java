@@ -12,7 +12,6 @@ import ject.mycode.domain.search.entity.SearchKeyword;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponseCode;
-import ject.mycode.global.response.ErrorResponseCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +39,7 @@ public class SearchServiceImpl implements SearchService {
         int offset = (page - 1) * limit;
 
         userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IllegalArgumentException(BaseResponseCode.USER_NOT_FOUND.getMessage()));
 
         Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(user.getId(), keyword);
 
@@ -96,7 +95,7 @@ public class SearchServiceImpl implements SearchService {
     public List<String> getRecentSearchKeywords(User user) {
 
         userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IllegalArgumentException(BaseResponseCode.USER_NOT_FOUND.getMessage()));
 
         // user별 최근 검색어 10개 조회 (가장 최근 순)
         return searchRepository.findTop10ByUserIdOrderBySearchedAtDesc(user.getId())
@@ -110,7 +109,7 @@ public class SearchServiceImpl implements SearchService {
     public void deleteKeyword(User user, String keyword) {
 
         userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IllegalArgumentException(BaseResponseCode.USER_NOT_FOUND.getMessage()));
 
         SearchKeyword searchKeyword = searchRepository
                 .findByUserIdAndKeyword(user.getId(), keyword)
@@ -123,7 +122,7 @@ public class SearchServiceImpl implements SearchService {
     public void deleteAllKeywords(User user) {
 
         userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException(ErrorResponseCode.USER_NOT_FOUND.getMessage()));
+                .orElseThrow(() -> new IllegalArgumentException(BaseResponseCode.USER_NOT_FOUND.getMessage()));
 
         List<SearchKeyword> keywords = searchRepository.findAllByUserId(user.getId());
         if (keywords.isEmpty()) {

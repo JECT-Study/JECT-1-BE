@@ -30,7 +30,7 @@ public class SearchController {
             @CurrentUser User user
     ) {
         if (keyword == null || keyword.trim().isEmpty()) {
-            return new BaseResponse<>(ErrorResponseCode.SEARCH_KEYWORD_MISSING);
+            return new BaseResponse<>(BaseResponseCode.SEARCH_KEYWORD_MISSING);
         }
 
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);

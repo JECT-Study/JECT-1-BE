@@ -10,7 +10,7 @@ import ject.mycode.domain.auth.jwt.util.JwtProvider;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.exception.GeneralException;
 import ject.mycode.global.response.BaseResponse;
-import ject.mycode.global.response.ErrorResponseCode;
+import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.util.RedisUtil;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +37,7 @@ public class JwtFilter extends OncePerRequestFilter {
             if(accessToken != null && jwtProvider.validateToken(accessToken)) {
                 String blackListValue = (String) redisUtil.get(accessToken);
                 if (blackListValue != null && blackListValue.equals("logout")) {
-                    throw new AuthHandler(ErrorResponseCode.TOKEN_LOGGED_OUT);
+                    throw new AuthHandler(BaseResponseCode.TOKEN_LOGGED_OUT);
                 }
                 String socialId = jwtProvider.getSocialId(accessToken);
 
@@ -50,13 +50,13 @@ public class JwtFilter extends OncePerRequestFilter {
                     //현재 Request의 Security Context에 접근 권한 설정
                     SecurityContextHolder.getContext().setAuthentication(authentication);
                 } else {
-                    throw new AuthHandler(ErrorResponseCode.USER_NOT_FOUND);
+                    throw new AuthHandler(BaseResponseCode.USER_NOT_FOUND);
                 }
             }
             // 다음 필터로 넘기기
             filterChain.doFilter(request, response);
         } catch (GeneralException e) {
-            ErrorResponseCode code = e.getCode();  // 예외로부터 에러 코드 객체 받아옴
+            BaseResponseCode code = e.getCode();  // 예외로부터 에러 코드 객체 받아옴
 
             response.setContentType("application/json; charset=UTF-8");
             response.setStatus(code.getHttpStatus().value());
