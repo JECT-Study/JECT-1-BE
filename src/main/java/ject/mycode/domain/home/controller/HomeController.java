@@ -50,7 +50,8 @@ public class HomeController{
 
     @GetMapping("/category")
     public BaseResponse<List<ContentCategoryRes>> getSameCategoryContents(
-            @RequestParam(value = "category", required = false) ContentType contentType
+            @RequestParam(value = "category", required = false) ContentType contentType,
+            @CurrentUser User user
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_SAME_CATEGORY_CONTENT,
                 contentService.getSameCategoryContents(contentType));
