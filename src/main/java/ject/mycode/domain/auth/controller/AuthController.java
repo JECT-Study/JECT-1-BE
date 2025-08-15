@@ -37,4 +37,11 @@ public class AuthController {
         authCommandService.logout(request);
         return new BaseResponse<>(BaseResponseCode.LOGOUT_SUCCESS);
     }
+
+    @Operation(summary = "회원 탈퇴", description = "회원 탈퇴 기능입니다.")
+    @DeleteMapping("/withdraw")
+    public BaseResponse<String> withdraw(HttpServletRequest request) {
+        authCommandService.withdraw(request);
+        return new BaseResponse<>(BaseResponseCode.WITHDRAW_SUCCESS);
+    }
 }

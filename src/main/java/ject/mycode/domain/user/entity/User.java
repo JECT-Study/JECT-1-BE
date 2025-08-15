@@ -4,12 +4,15 @@ import jakarta.persistence.*;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
+import ject.mycode.domain.user.enums.UserStatus;
 import ject.mycode.global.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "\"user\"")
@@ -40,8 +43,15 @@ public class User extends BaseEntity {
 	@Column(nullable = false)
 	private UserRole role;
 
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserStatus userStatus;
+
+	// 탈퇴한 시간 저장용
+	private LocalDateTime inactiveDate;
+
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "region_id", nullable = false)
+	@JoinColumn(name = "region_id", nullable = true)
 	private Region region;
 
 	public void changeProfileImage(String image) {
@@ -54,5 +64,13 @@ public class User extends BaseEntity {
 
 	public void saveRecommendRegion(Region region) {
 		this.region = region;
+	}
+
+	public void setUserStatus(UserStatus userStatus) {
+		this.userStatus = userStatus;
+	}
+
+	public void setInactiveDate(LocalDateTime now) {
+		this.inactiveDate = now;
 	}
 }

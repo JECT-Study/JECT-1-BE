@@ -12,6 +12,7 @@ public enum BaseResponseCode {
 	LOGIN_SUCCESS(true, 1000, "로그인 성공", HttpStatus.OK),
 	TOKEN_REISSUE_SUCCESS(true, 1001, "토큰 재발급이 완료되었습니다.", HttpStatus.OK),
 	LOGOUT_SUCCESS(true, 1002, "로그아웃이 완료되었습니다.", HttpStatus.OK),
+	WITHDRAW_SUCCESS(true, 1003, "회원탈퇴가 완료되었습니다.", HttpStatus.OK),
 
 	// 1100 ~ 1199 : 컨텐츠 관련
 	ADD_FAVORITE(true, 1100, "관심목록에 추가했습니다.", HttpStatus.CREATED),
@@ -47,9 +48,9 @@ public enum BaseResponseCode {
 	// 2100 ~ 2199 : 컨텐츠 관련
 	CONTENT_NOT_EXIST(false, 2100, "존재하지 않는 컨텐츠입니다.", HttpStatus.NOT_FOUND),
 	FAVORITE_NOT_EXIST(false, 2101, "존재하지 않는 즐겨찾기입니다.", HttpStatus.NOT_FOUND),
+	USER_REGION_NOT_SET(false, 2102, "사용자 지역 정보가 설정되지 않았습니다.", HttpStatus.BAD_REQUEST),
 
 	//2200 ~ 2299 : 일정 관련
-
 	VALIDATION_FAILED(false, 2999, "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
 	SCHEDULE_NOT_EXIST(false, 2200, "해당 일정이 없습니다.", HttpStatus.NOT_FOUND),
 
@@ -76,8 +77,7 @@ public enum BaseResponseCode {
 	INVALID_TOKEN(false, 4004, "유효하지 않은 토큰입니다.", HttpStatus.UNAUTHORIZED),
 	FORBIDDEN(false, 4030, "접근 권한이 없습니다.", HttpStatus.FORBIDDEN),
 	UNAUTHORIZED(false, 4010, "인증이 필요합니다.", HttpStatus.UNAUTHORIZED),
-	TOKEN_EXPIRED(false, 4011, "토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),
-	;
+	TOKEN_EXPIRED(false, 4011, "토큰이 만료되었습니다.", HttpStatus.UNAUTHORIZED),;
 
 
 	private final Boolean status;

@@ -10,6 +10,7 @@ import ject.mycode.domain.auth.jwt.util.JwtProvider;
 import ject.mycode.domain.user.converter.UserConverter;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.enums.UserRole;
+import ject.mycode.domain.user.enums.UserStatus;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.response.BaseResponseCode;
@@ -17,7 +18,9 @@ import ject.mycode.global.util.NicknameGenerator;
 import ject.mycode.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -47,6 +50,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
                     .socialType(request.getSocialType())
                     .nickname(NicknameGenerator.generate()) // 랜덤 닉네임
                     .role(UserRole.NORMAL) // 권한 기본값
+                    .userStatus(UserStatus.ACTIVE)
                     .region(null)
                     .image(null)
                     .build();
@@ -84,6 +88,36 @@ public class AuthCommandServiceImpl implements AuthCommandService {
             redisUtil.expire(accessToken, jwtProvider.getExpTime(accessToken), TimeUnit.MILLISECONDS);
             // RefreshToken 삭제
             redisUtil.delete(jwtProvider.getSocialId(accessToken));
+        } catch (ExpiredJwtException e) {
+            throw new AuthHandler(BaseResponseCode.TOKEN_EXPIRED);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void withdraw(HttpServletRequest request) {
+        try {
+            // AccessToken 추출
+            String accessToken = jwtProvider.resolveAccessToken(request);
+
+            // 회원 정보 중 socialId 추출
+            String socialId = jwtProvider.getSocialId(accessToken);
+
+            // DB에서 회원 조회
+            User user = userRepository.findBySocialId(socialId)
+                    .orElseThrow(() -> new AuthHandler(BaseResponseCode.USER_NOT_FOUND));
+
+            // 회원 상태 비활성화 처리 (soft delete)
+            user.setUserStatus(UserStatus.INACTIVE);
+            user.setInactiveDate(LocalDateTime.now());
+            userRepository.save(user);
+
+            // accessToken 블랙리스트 처리
+            redisUtil.set(accessToken, "withdraw");
+            redisUtil.expire(accessToken, jwtProvider.getExpTime(accessToken), TimeUnit.MILLISECONDS);
+
+            // refreshToken 삭제
+            redisUtil.delete(socialId);
         } catch (ExpiredJwtException e) {
             throw new AuthHandler(BaseResponseCode.TOKEN_EXPIRED);
         }
