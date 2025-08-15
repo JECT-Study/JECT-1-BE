@@ -10,6 +10,7 @@ import ject.mycode.domain.auth.jwt.util.JwtProvider;
 import ject.mycode.domain.user.converter.UserConverter;
 import ject.mycode.domain.user.entity.User;
 import ject.mycode.domain.user.enums.UserRole;
+import ject.mycode.domain.user.enums.UserStatus;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
 import ject.mycode.global.response.BaseResponseCode;
@@ -47,6 +48,7 @@ public class AuthCommandServiceImpl implements AuthCommandService {
                     .socialType(request.getSocialType())
                     .nickname(NicknameGenerator.generate()) // 랜덤 닉네임
                     .role(UserRole.NORMAL) // 권한 기본값
+                    .userStatus(UserStatus.ACTIVE)
                     .region(null)
                     .image(null)
                     .build();
