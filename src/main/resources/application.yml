@@ -29,7 +29,7 @@ spring:
         enabled: false
 
   jwt:
-    secret: VGhpcyBpcyBhIHZlcnkgc2VjdXJlIGp3dCBzZWNyZXQga2V5IHdpdGggNjQgYnl0ZXM=
+    secret: ${JWT_SECRET}
     token:
       access-expiration-time: 3600000 #1시간
       refresh-expiration-time: 604800000 #7일
