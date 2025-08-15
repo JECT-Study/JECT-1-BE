@@ -9,4 +9,5 @@ public interface AuthCommandService {
     AuthRes.LoginResultDTO login(AuthReq.SocialLoginDTO request);
     JwtRes reissueToken(String refreshToken);
     void logout(HttpServletRequest request);
+    void withdraw(HttpServletRequest request);
 }
