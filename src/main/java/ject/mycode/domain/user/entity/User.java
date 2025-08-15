@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
+import ject.mycode.domain.user.enums.UserStatus;
 import ject.mycode.global.entity.BaseEntity;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -39,6 +40,10 @@ public class User extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private UserRole role;
+
+	@Enumerated(EnumType.STRING)
+	@Column(nullable = false)
+	private UserStatus userStatus;
 
 	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "region_id", nullable = false)
