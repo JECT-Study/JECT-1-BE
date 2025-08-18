@@ -9,6 +9,7 @@ import ject.mycode.global.util.RedisUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -31,6 +32,8 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors
+                        .configurationSource(CorsConfig.corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v3/api-docs/**",
@@ -42,21 +45,12 @@ public class SecurityConfig {
                         ).permitAll()
                         .requestMatchers("/api/auth/**", "/**", "/aws").permitAll()
                         .anyRequest().authenticated())
-                        //JwtAuthFilter를 UsernamePasswordAuthenticationFilter 앞에 추가
                         .addFilterBefore(new JwtFilter(jwtProvider, redisUtil, principalDetailsService), UsernamePasswordAuthenticationFilter.class)
                         // 예외 처리 설정
                         .exceptionHandling(exception -> exception
                                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                                 .accessDeniedHandler(jwtAccessDeniedHandler)
                         );
-//                .userDetailsService(customUserDetailsService)
-//                .exceptionHandling(exception ->
-//                {
-//                    exception.authenticationEntryPoint(customJwtAuthenticationEntryPoint);
-//                    exception.accessDeniedHandler(customAccessDeniedHandler);
-//                })
-//                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-
 
         return http.build();
     }
