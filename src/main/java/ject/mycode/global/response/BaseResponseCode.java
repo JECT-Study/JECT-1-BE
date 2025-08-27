@@ -69,6 +69,7 @@ public enum BaseResponseCode {
 	TOKEN_LOGGED_OUT(false, 2401, "로그아웃된 토큰입니다.", HttpStatus.UNAUTHORIZED),
 	USER_NOT_FOUND(false, 2402, "사용자를 찾을 수 없습니다.", HttpStatus.NOT_FOUND),
 	UNSUPPORTED_PROVIDER(false, 2403, "지원하지 않는 소셜 provider입니다", HttpStatus.BAD_REQUEST),
+	INACTIVE_USER(false, 2404, "이미 탈퇴한 사용자입니다.", HttpStatus.FORBIDDEN),
 
 	// 3000번대 : 응답 오류
 

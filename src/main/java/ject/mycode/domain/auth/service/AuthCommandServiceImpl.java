@@ -13,6 +13,7 @@ import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.enums.UserStatus;
 import ject.mycode.domain.user.repository.UserRepository;
 import ject.mycode.global.exception.AuthHandler;
+import ject.mycode.global.exception.CustomException;
 import ject.mycode.global.response.BaseResponseCode;
 import ject.mycode.global.util.NicknameGenerator;
 import ject.mycode.global.util.RedisUtil;
@@ -43,6 +44,10 @@ public class AuthCommandServiceImpl implements AuthCommandService {
         if (optionalUser.isPresent()) {
             // 이미 존재하는 사용자 → 로그인 처리
             user = optionalUser.get();
+
+            if (user.getUserStatus() == UserStatus.INACTIVE) {
+                throw new CustomException(BaseResponseCode.INACTIVE_USER);
+            }
         } else {
             // 사용자 없으면 → 회원가입 처리
             user = User.builder()
