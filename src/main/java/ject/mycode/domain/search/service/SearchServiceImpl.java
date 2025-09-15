@@ -41,36 +41,40 @@ public class SearchServiceImpl implements SearchService {
         userRepository.findById(user.getId())
                 .orElseThrow(() -> new IllegalArgumentException(BaseResponseCode.USER_NOT_FOUND.getMessage()));
 
-        Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(user.getId(), keyword);
+        List<Content> contentList;
+        int totalCount;
 
-        if (existingKeyword.isPresent()) {
-            // 기존 검색어가 있으면 searchedAt만 업데이트
-            SearchKeyword keywordEntity = existingKeyword.get();
-            keywordEntity.setSearchedAt(LocalDateTime.now());
-            searchRepository.save(keywordEntity);
+        if (keyword == null || keyword.trim().isEmpty()) {
+            // ✅ 검색어 없으면 전체 조회
+            contentList = searchQueryRepository.findAllContents(limit, offset, sort);
+            totalCount = searchQueryRepository.countAllContents();
         } else {
-            // 없으면 새로 저장
-            searchRepository.save(
-                    SearchKeyword.builder()
-                            .user(user)
-                            .keyword(keyword)
-                            .searchedAt(LocalDateTime.now())
-                            .build()
-            );
+            // ✅ 검색어 있으면 기존 로직
+            Optional<SearchKeyword> existingKeyword = searchRepository.findByUserIdAndKeyword(user.getId(), keyword);
+
+            if (existingKeyword.isPresent()) {
+                SearchKeyword keywordEntity = existingKeyword.get();
+                keywordEntity.setSearchedAt(LocalDateTime.now());
+                searchRepository.save(keywordEntity);
+            } else {
+                searchRepository.save(
+                        SearchKeyword.builder()
+                                .user(user)
+                                .keyword(keyword)
+                                .searchedAt(LocalDateTime.now())
+                                .build()
+                );
+            }
+
+            contentList = searchQueryRepository.findContentsByKeyword(keyword, limit, offset, sort);
+            totalCount = searchQueryRepository.countContentsByKeyword(keyword);
         }
-        // 검색 결과 조회
-        List<Content> contentList = searchQueryRepository.findContentsByKeyword(keyword, limit, offset, sort);
 
-        // 조회수 1씩 증가
+        // 조회수 +1
         contentList.forEach(content -> content.setViews(content.getViews() + 1));
-
-        // 변경된 조회수를 DB에 반영
         contentRepository.saveAll(contentList);
 
-        // 전체 개수 조회
-        int totalCount = searchQueryRepository.countContentsByKeyword(keyword);
-
-        // contentId -> 썸네일 imageUrl 맵 만들기
+        // 썸네일 맵 조회
         Map<Long, String> thumbnailMap = contentImageQueryRepository.findThumbnailUrlsByContentIds(
                 contentList.stream().map(Content::getId).toList()
         );
@@ -80,7 +84,7 @@ public class SearchServiceImpl implements SearchService {
                 .map(content -> new ContentSummary(
                         content.getId(),
                         content.getTitle(),
-                        thumbnailMap.get(content.getId()), // 썸네일 URL 매핑해서 넣기
+                        thumbnailMap.get(content.getId()),
                         content.getContentType().toString(),
                         content.getAddress(),
                         content.getStartDate(),
@@ -90,6 +94,7 @@ public class SearchServiceImpl implements SearchService {
 
         return new SearchContentsRes(totalCount, page, summaries);
     }
+
 
     @Override
     public List<String> getRecentSearchKeywords(User user) {

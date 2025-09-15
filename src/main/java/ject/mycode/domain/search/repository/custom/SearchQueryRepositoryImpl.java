@@ -101,4 +101,34 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
 
         return new PageImpl<>(results, pageable, total);
     }
+
+    public List<Content> findAllContents(int limit, int offset, String sort) {
+        QContent content = QContent.content;
+
+        OrderSpecifier<?> orderSpecifier;
+        if ("views".equalsIgnoreCase(sort)) {
+            orderSpecifier = content.views.desc();
+        } else if ("date".equalsIgnoreCase(sort)) {
+            orderSpecifier = content.startDate.desc();
+        } else {
+            orderSpecifier = content.id.desc(); // 기본 정렬
+        }
+
+        return queryFactory
+                .selectFrom(content)
+                .orderBy(orderSpecifier)
+                .offset(offset)
+                .limit(limit)
+                .fetch();
+    }
+
+    public int countAllContents() {
+        QContent content = QContent.content;
+        return Math.toIntExact(
+                queryFactory.select(content.count())
+                        .from(content)
+                        .fetchOne()
+        );
+    }
+
 }

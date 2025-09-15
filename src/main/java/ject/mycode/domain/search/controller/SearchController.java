@@ -28,10 +28,6 @@ public class SearchController {
             @RequestParam(value = "sort", defaultValue = "latest") String sort,
             @CurrentUser User user
     ) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return new BaseResponse<>(BaseResponseCode.SEARCH_KEYWORD_MISSING);
-        }
-
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);
         return new BaseResponse<>(BaseResponseCode.SEARCH_SUCCESS, result);
     }

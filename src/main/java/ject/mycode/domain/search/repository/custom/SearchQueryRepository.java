@@ -12,4 +12,6 @@ public interface SearchQueryRepository {
     int countContentsByKeyword(String keyword);
     List<String> findTop10PopularKeywords();
     Page<Content> getSearchResults(String keyword, ContentType category, String region, Pageable pageable);
+    List<Content> findAllContents(int limit, int offset, String sort);
+    int countAllContents();
 }
