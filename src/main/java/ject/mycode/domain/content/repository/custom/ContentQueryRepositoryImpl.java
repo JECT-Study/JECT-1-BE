@@ -71,7 +71,9 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 					content.introduction,
 					content.description,
 					content.longitude,
-					content.latitude
+					content.latitude,
+					content.homepageUrl,
+					content.telNumber
 				))
 				.from(content)
 				.where(content.id.eq(contentId))
@@ -107,7 +109,9 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				content.introduction,
 				content.description,
 				content.longitude,
-				content.latitude
+				content.latitude,
+				content.homepageUrl,
+				content.telNumber
 			))
 			.from(content)
 			.where(content.id.eq(contentId))

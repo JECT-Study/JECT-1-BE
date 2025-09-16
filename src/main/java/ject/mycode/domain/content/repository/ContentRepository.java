@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import ject.mycode.domain.content.entity.Content;
 
 public interface ContentRepository extends JpaRepository<Content, Long> {
+	Boolean existsByApiId(String apiId);
 }

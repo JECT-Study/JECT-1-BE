@@ -30,4 +30,5 @@ public class ContentDetailsRes {
 	private String description;
 	private Double longitude;
 	private Double latitude;
+
 }
