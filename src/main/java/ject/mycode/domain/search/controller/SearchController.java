@@ -26,7 +26,7 @@ public class SearchController {
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "limit", defaultValue = "10") int limit,
             @RequestParam(value = "sort", defaultValue = "latest") String sort,
-            @CurrentUser User user
+            @CurrentUser(required = false) User user // 로그인 안 했으면 null
     ) {
         SearchContentsRes result = searchService.searchContents(keyword, page, limit, sort, user);
         return new BaseResponse<>(BaseResponseCode.SEARCH_SUCCESS, result);
