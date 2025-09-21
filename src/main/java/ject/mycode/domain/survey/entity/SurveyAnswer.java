@@ -33,11 +33,7 @@ public class SurveyAnswer extends BaseEntity {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "survey_question_id")
-	private SurveyQuestion surveyQuestion;
+	private Long surveyQuestion;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "question_option_id")
-	private QuestionOption questionOption;
+	private Long questionOption;
 }
