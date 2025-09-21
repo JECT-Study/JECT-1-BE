@@ -32,6 +32,8 @@ public class Content extends BaseEntity {
     @Column
     private String placeName;
 
+    private String telNumber;
+
     @Column(columnDefinition = "TEXT", nullable = false)
     private String introduction;
 

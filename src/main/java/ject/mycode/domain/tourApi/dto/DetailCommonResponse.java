@@ -1,38 +1,68 @@
 package ject.mycode.domain.tourApi.dto;
 
-import lombok.Data;
+import lombok.Getter;
 import java.util.List;
 
-@Data
+@Getter
 public class DetailCommonResponse {
-    private Response response;
+    private Wrapper response;
 
-    @Data
-    public static class Response {
+    @Getter
+    public static class Wrapper {
         private Header header;
         private Body body;
     }
 
-    @Data
+    @Getter
     public static class Header {
         private String resultCode;
         private String resultMsg;
     }
 
-    @Data
+    @Getter
     public static class Body {
         private Items items;
+        private int numOfRows;
+        private int pageNo;
+        private int totalCount;
     }
 
-    @Data
+    @Getter
     public static class Items {
         private List<DetailItem> item;
     }
 
-    @Data
+    @Getter
     public static class DetailItem {
-        private String homepage;
+        private String contentid;
+        private String contenttypeid;
+        private String title;
+
+        // 주소
+        private String addr1;
+        private String addr2;
+        private String zipcode;
+
+        // 지역 코드
+        private String areacode;
+        private String sigungucode;
+
+        // 좌표
+        private String mapx;
+        private String mapy;
+        private String mlevel;
+
+        // 이미지
+        private String firstimage;
+        private String firstimage2;
+
+        // 개요, 홈페이지, 연락처
         private String overview;
-        private String program;
+        private String homepage;
+        private String tel;
+
+        // 기타
+        private String createdtime;
+        private String modifiedtime;
     }
 }
