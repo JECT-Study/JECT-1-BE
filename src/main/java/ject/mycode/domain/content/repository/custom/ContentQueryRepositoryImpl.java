@@ -223,12 +223,9 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						ContentRecommendRes.class,
 						content.id,
 						content.title,
-						// 대표 이미지 url을 서브쿼리로 가져옴
-						JPAExpressions.select(contentImageSub.imageUrl)
+						JPAExpressions.select(contentImageSub.imageUrl.min())
 								.from(contentImageSub)
-								.where(contentImageSub.content.eq(content))
-								.orderBy(contentImageSub.id.asc())
-								.limit(1),
+								.where(contentImageSub.content.eq(content)),
 						content.contentType,
 						content.address,
 						content.longitude,
@@ -274,11 +271,9 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.id,
 						content.title,
 						JPAExpressions
-								.select(contentImageSub.imageUrl)
+								.select(contentImageSub.imageUrl.min())
 								.from(contentImageSub)
-								.where(contentImageSub.content.eq(content))
-								.orderBy(contentImageSub.id.asc())
-								.limit(1),
+								.where(contentImageSub.content.eq(content)),
 						content.contentType,
 						content.address,
 						content.longitude,
@@ -428,12 +423,9 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.id,
 						content.title,
 						content.address,
-						// 대표 이미지 서브쿼리 (예: contentImage가 있다면)
-						JPAExpressions.select(contentImageSub.imageUrl)
-								.from(contentImageSub)
-								.where(contentImageSub.content.eq(content))
-								.orderBy(contentImageSub.id.asc())
-								.limit(1),
+						JPAExpressions.select(contentImageSub.imageUrl.min())
+						.from(contentImageSub)
+						.where(contentImageSub.content.eq(content)),
 						content.startDate.stringValue(),
 						content.endDate.stringValue()
 				))

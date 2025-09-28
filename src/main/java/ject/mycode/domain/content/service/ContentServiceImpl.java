@@ -110,7 +110,6 @@ public class ContentServiceImpl implements ContentService {
 		return contentQueryRepository.findContentsByCategory(contentType);
 	}
 
-
 	public List<ContentRegionRes> getRecommendedContents(Long userId) {
 		User user = userRepository.findById(userId)
 				.orElseThrow(() -> new CustomException(BaseResponseCode.USER_NOT_FOUND));
