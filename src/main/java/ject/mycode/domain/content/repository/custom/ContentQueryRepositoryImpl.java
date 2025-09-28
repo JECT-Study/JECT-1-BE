@@ -240,6 +240,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.asc(),
 						content.startDate.asc()
 				)
+				.limit(9)
 				.fetch();
   }
   
@@ -289,6 +290,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.asc(),
 						content.startDate.asc()
 				)
+				.limit(9)
 				.fetch();
 	}
 
@@ -319,6 +321,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.asc(),
 						content.startDate.asc()
 				)
+				.limit(9)
 				.fetch();
 	}
 
@@ -357,6 +360,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.asc(), // 2차: 종료일 빠른 순
 						content.startDate.asc() // 3차: 시작일 빠른 순 (동일 종료일일 경우)
 				)
+				.limit(9)
 				.fetch();
 	}
 
@@ -442,6 +446,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.asc(),
 						content.startDate.asc()
 				)
+				.limit(9)
 				.fetch();
 	}
 
