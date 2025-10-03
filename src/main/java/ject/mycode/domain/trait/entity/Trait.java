@@ -34,6 +34,7 @@ public class Trait extends BaseEntity {
 	@Enumerated(EnumType.STRING)
 	private MinusTrait minusTrait;
 
+	@Builder.Default
 	@OneToMany(mappedBy = "trait", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
 	private List<ContentTrait> contentTraits = new ArrayList<>();
 }

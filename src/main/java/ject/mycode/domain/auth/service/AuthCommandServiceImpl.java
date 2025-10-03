@@ -56,7 +56,6 @@ public class AuthCommandServiceImpl implements AuthCommandService {
                     .nickname(NicknameGenerator.generate()) // 랜덤 닉네임
                     .role(UserRole.NORMAL) // 권한 기본값
                     .userStatus(UserStatus.ACTIVE)
-                    .region(null)
                     .image(null)
                     .build();
 

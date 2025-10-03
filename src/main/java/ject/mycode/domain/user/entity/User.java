@@ -2,6 +2,7 @@ package ject.mycode.domain.user.entity;
 
 import jakarta.persistence.*;
 import ject.mycode.domain.region.entity.Region;
+import ject.mycode.domain.region.entity.UserRegion;
 import ject.mycode.domain.user.enums.SocialType;
 import ject.mycode.domain.user.enums.UserRole;
 import ject.mycode.domain.user.enums.UserStatus;
@@ -13,6 +14,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "\"user\"")
@@ -50,9 +53,9 @@ public class User extends BaseEntity {
 	// 탈퇴한 시간 저장용
 	private LocalDateTime inactiveDate;
 
-	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "region_id", nullable = true)
-	private Region region;
+	@Builder.Default
+	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<UserRegion> userRegions = new ArrayList<>();
 
 	public void changeProfileImage(String image) {
 		this.image = image;
@@ -60,10 +63,6 @@ public class User extends BaseEntity {
 
 	public void changeNickname(String nickname) {
 		this.nickname = nickname;
-	}
-
-	public void saveRecommendRegion(Region region) {
-		this.region = region;
 	}
 
 	public void setUserStatus(UserStatus userStatus) {

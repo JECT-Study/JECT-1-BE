@@ -1,4 +1,4 @@
-package ject.mycode.domain.trait.entity;
+package ject.mycode.domain.region.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -18,29 +18,22 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_trait")
-@Builder
+@Table(name = "user_region")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-public class UserTrait extends BaseEntity {
+@Builder
+public class UserRegion extends BaseEntity {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "user_region_id")
 	private Long id;
 
-	@Column(nullable = false)
-	private int totalScore;
-
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "user_id")
+	@JoinColumn(name = "user_id", nullable = false)
 	private User user;
 
 	@ManyToOne(fetch = FetchType.LAZY)
-	@JoinColumn(name = "trait_id")
-	private Trait trait;
-
-	// 도메인 메서드
-	public void updateTotalScore(int totalScore) {
-		this.totalScore = totalScore;
-	}
+	@JoinColumn(name = "region_id", nullable = false)
+	private Region region;
 }

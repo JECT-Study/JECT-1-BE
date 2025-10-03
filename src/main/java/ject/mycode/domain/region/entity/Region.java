@@ -23,6 +23,11 @@ public class Region extends BaseEntity {
     @Column(nullable = false)
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Content> contents = new ArrayList<>();
+
+    @Builder.Default
+    @OneToMany(mappedBy = "region", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserRegion> userRegions = new ArrayList<>();
 }

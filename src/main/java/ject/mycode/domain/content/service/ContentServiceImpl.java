@@ -5,6 +5,8 @@ import java.util.List;
 
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.content.enums.ContentType;
+import ject.mycode.domain.region.entity.UserRegion;
+import ject.mycode.domain.region.repository.UserRegionRepository;
 import ject.mycode.domain.user.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,6 +34,7 @@ public class ContentServiceImpl implements ContentService {
 	private final ContentImageRepository contentImageRepository;
 	private final ContentTagRepository contentTagRepository;
 	private final UserRepository userRepository;
+	private final UserRegionRepository userRegionRepository;
 
 	@Override
 	@Transactional
@@ -111,10 +114,9 @@ public class ContentServiceImpl implements ContentService {
 	}
 
 	public List<ContentRegionRes> getRecommendedContents(Long userId) {
-		User user = userRepository.findById(userId)
-				.orElseThrow(() -> new CustomException(BaseResponseCode.USER_NOT_FOUND));
+		List<UserRegion> userRegionList = userRegionRepository.findAllByUserId(userId);
 
-		if (user.getRegion() == null) {
+		if (userRegionList.isEmpty()) {
 			throw new CustomException(BaseResponseCode.USER_REGION_NOT_SET);
 		}
 

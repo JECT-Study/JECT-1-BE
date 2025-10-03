@@ -36,4 +36,9 @@ public class SurveyAnswer extends BaseEntity {
 	private Long surveyQuestion;
 
 	private Long questionOption;
+
+	// 도메인 메서드
+	public void changeAnswer(Long newOptionId) {
+		this.questionOption = newOptionId;
+	}
 }

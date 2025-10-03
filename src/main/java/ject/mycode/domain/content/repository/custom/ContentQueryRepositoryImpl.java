@@ -7,6 +7,7 @@ import java.util.List;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.region.entity.QUserRegion;
 import ject.mycode.domain.user.entity.QUser;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,6 +46,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QTag tag = QTag.tag;
 	private final QFavorite favorite = QFavorite.favorite;
 	private final QSchedule schedule = QSchedule.schedule;
+	private final QUserRegion userRegion = QUserRegion.userRegion;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
@@ -416,38 +418,35 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
 		LocalDate today = LocalDate.now();
 		NumberExpression<Integer> statusOrder = new CaseBuilder()
-				.when(content.endDate.goe(today)).then(0)
-				.otherwise(1);
-
-		// 서브쿼리로 사용자 지역 ID 조회
-		QUser userSub = new QUser("userSub");
+			.when(content.endDate.goe(today)).then(0)
+			.otherwise(1);
 
 		return qf.select(Projections.constructor(
-						ContentRegionRes.class,
-						content.id,
-						content.title,
-						content.address,
-						JPAExpressions.select(contentImageSub.imageUrl.min())
-						.from(contentImageSub)
-						.where(contentImageSub.content.eq(content)),
-						content.startDate.stringValue(),
-						content.endDate.stringValue()
-				))
-				.from(content)
-				.join(content.region, region)
-				// content.region.id가 사용자 지역 ID와 같은 것만 필터링
-				.where(region.id.eq(
-						JPAExpressions.select(userSub.region.id)
-								.from(userSub)
-								.where(userSub.id.eq(userId))
-				))
-				.orderBy(
-						statusOrder.asc(),
-						content.endDate.asc(),
-						content.startDate.asc()
+				ContentRegionRes.class,
+				content.id,
+				content.title,
+				content.address,
+				JPAExpressions.select(contentImageSub.imageUrl.min())
+					.from(contentImageSub)
+					.where(contentImageSub.content.eq(content)),
+				content.startDate.stringValue(),
+				content.endDate.stringValue()
+			))
+			.from(content)
+			.join(content.region, region)
+			.where(
+				region.id.in(
+					JPAExpressions.select(userRegion.region.id)
+						.from(userRegion)
+						.where(userRegion.user.id.eq(userId))
 				)
-				.limit(9)
-				.fetch();
+			)
+			.orderBy(
+				statusOrder.asc(),
+				content.endDate.asc(),
+				content.startDate.asc()
+			)
+			.limit(9)
+			.fetch();
 	}
-
 }

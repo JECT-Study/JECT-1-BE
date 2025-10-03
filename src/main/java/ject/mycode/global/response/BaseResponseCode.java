@@ -71,6 +71,10 @@ public enum BaseResponseCode {
 	UNSUPPORTED_PROVIDER(false, 2403, "지원하지 않는 소셜 provider입니다", HttpStatus.BAD_REQUEST),
 	INACTIVE_USER(false, 2404, "이미 탈퇴한 사용자입니다.", HttpStatus.FORBIDDEN),
 
+	//2500 ~ 2599 : 설문 관련
+	QUESTION_OPTION_ID_NOT_EXIST(false, 2500, "해당 questionId/optionId에 매칭되는 QuestionOption이 없습니다", HttpStatus.NOT_FOUND),
+
+
 	// 3000번대 : 응답 오류
 
 	// 4000번대 : 서버 내부 오류;
