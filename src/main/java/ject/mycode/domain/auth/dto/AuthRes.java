@@ -5,7 +5,18 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 public class AuthRes {
+
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class UserRegionDTO {
+        private Long id;
+        private String name;
+    }
 
     @Getter
     @AllArgsConstructor
@@ -17,5 +28,6 @@ public class AuthRes {
         String refreshToken;
         String image;
         String nickname;
+        private List<UserRegionDTO> userRegions;
     }
 }
