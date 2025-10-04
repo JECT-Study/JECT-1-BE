@@ -113,6 +113,7 @@ public class ContentServiceImpl implements ContentService {
 		return contentQueryRepository.findContentsByCategory(contentType);
 	}
 
+    @Override
 	public List<ContentRegionRes> getRecommendedContents(Long userId) {
 		List<UserRegion> userRegionList = userRegionRepository.findAllByUserId(userId);
 
