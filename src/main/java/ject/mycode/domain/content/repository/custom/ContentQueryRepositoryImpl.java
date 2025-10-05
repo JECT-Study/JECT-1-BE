@@ -3,12 +3,14 @@ package ject.mycode.domain.content.repository.custom;
 import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.region.entity.QUserRegion;
-import ject.mycode.domain.user.entity.QUser;
+import ject.mycode.domain.region.repository.UserRegionRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +49,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QFavorite favorite = QFavorite.favorite;
 	private final QSchedule schedule = QSchedule.schedule;
 	private final QUserRegion userRegion = QUserRegion.userRegion;
+    private final UserRegionRepository userRegionRepository;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
@@ -213,8 +216,24 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	}
 
 	@Override
-	public List<ContentRecommendRes> findRecommendedContents(ContentType contentType) {
+	public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
 		LocalDate today = LocalDate.now();
+
+        // 1. 사용자 선호 지역 ID 목록 조회
+        List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
+        // UserRegion 엔티티에서 Region 엔티티의 ID를 추출
+                .map(userRegion -> userRegion.getRegion().getId())
+                .collect(Collectors.toList());
+
+        // 2. 지역 조건(BooleanExpression) 생성
+        // 선호 지역이 설정되어 있을 때만 지역 필터를 적용합니다.
+        BooleanExpression regionFilter = null;
+        if (!preferredRegionIds.isEmpty()) {
+        // content 엔티티에 region 필드가 있다고 가정하고, 해당 ID가 리스트에 포함되는 조건 생성
+            regionFilter = content.region.id.in(preferredRegionIds);
+        }
+        // 지역 설정이 없을 경우 (preferredRegionIds.isEmpty()) regionFilter는 null로 유지되며,
+        // 쿼리의 WHERE 절에 포함되지 않아 '전국' 콘텐츠를 조회하게 됩니다.
 
 		NumberExpression<Integer> statusOrder = new CaseBuilder()
 				.when(content.endDate.goe(today)).then(0)
@@ -236,7 +255,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.endDate.stringValue()
 				))
 				.from(content)
-				.where(content.contentType.eq(contentType))
+				.where(content.contentType.eq(contentType), regionFilter)
 				.orderBy(
 						statusOrder.asc(),
 						content.endDate.asc(),
@@ -245,7 +264,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 				.limit(9)
 				.fetch();
   }
-  
+
 	@Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
 		return qf
@@ -414,39 +433,62 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
 
-	@Override
-	public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
-		LocalDate today = LocalDate.now();
-		NumberExpression<Integer> statusOrder = new CaseBuilder()
-			.when(content.endDate.goe(today)).then(0)
-			.otherwise(1);
 
-		return qf.select(Projections.constructor(
-				ContentRegionRes.class,
-				content.id,
-				content.title,
-				content.address,
-				JPAExpressions.select(contentImageSub.imageUrl.min())
-					.from(contentImageSub)
-					.where(contentImageSub.content.eq(content)),
-				content.startDate.stringValue(),
-				content.endDate.stringValue()
-			))
-			.from(content)
-			.join(content.region, region)
-			.where(
-				region.id.in(
-					JPAExpressions.select(userRegion.region.id)
-						.from(userRegion)
-						.where(userRegion.user.id.eq(userId))
-				)
-			)
-			.orderBy(
-				statusOrder.asc(),
-				content.endDate.asc(),
-				content.startDate.asc()
-			)
-			.limit(9)
-			.fetch();
-	}
+    @Override
+    public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
+        LocalDate today = LocalDate.now();
+
+        // 1. 사용자 선호 지역 ID 목록을 JPA Repository를 통해 미리 조회 (핵심)
+        // 이 메서드는 UserRegionRepository에 정의되어 있다고 가정합니다.
+        List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
+                .map(userRegion -> userRegion.getRegion().getId())
+                .collect(Collectors.toList());
+
+        // 2. 지역 조건(BooleanExpression) 동적 생성
+        BooleanExpression regionFilter;
+
+        if (preferredRegionIds.isEmpty()) {
+            // (A) 선호 지역이 없을 경우: 필터 조건 없음 (null) = 전국구 조회
+            regionFilter = null;
+        } else {
+            // (B) 선호 지역이 있을 경우: IN 절 조건 적용
+            // Querydsl의 기본 필드(region.id)를 사용하여 목록에 포함되는 조건 생성
+            regionFilter = content.region.id.in(preferredRegionIds);
+        }
+
+        // 3. 날짜 기반 정렬 로직 (기존과 동일)
+        NumberExpression<Integer> statusOrder = new CaseBuilder()
+                .when(content.endDate.goe(today)).then(0)
+                .otherwise(1);
+
+        // 4. Querydsl 쿼리 실행
+        return qf.select(Projections.constructor(
+                        ContentRegionRes.class,
+                        content.id,
+                        content.title,
+                        content.address,
+                        JPAExpressions.select(contentImageSub.imageUrl.min())
+                                .from(contentImageSub)
+                                .where(contentImageSub.content.eq(content)),
+                        content.startDate.stringValue(),
+                        content.endDate.stringValue()
+                ))
+                .from(content)
+                // content.region.id를 사용했으므로, 조인이 암시적으로 발생합니다.
+                // 명시적 JOIN은 필요하지 않으나, 엔티티 관계에 따라 유지할 수도 있습니다.
+                // 여기서는 필터링만 regionFilter에 맡기므로, join(content.region, region)은 제거할 수 있습니다.
+                // 단, 기존 코드에 명시적인 JOIN이 있었으므로, 명확성을 위해 유지합니다.
+                .join(content.region, region)
+
+                // 지역 필터 (null이면 무시됨, 값이 있으면 IN 조건으로 적용됨)
+                .where(regionFilter)
+
+                .orderBy(
+                        statusOrder.asc(),
+                        content.endDate.asc(),
+                        content.startDate.asc()
+                )
+                .limit(9)
+                .fetch();
+    }
 }

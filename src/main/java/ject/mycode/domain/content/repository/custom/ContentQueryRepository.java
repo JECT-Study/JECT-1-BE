@@ -18,7 +18,7 @@ public interface ContentQueryRepository {
 
 	Page<SchedulesInfoRes> findMySchedulesByUserId(Long userId, LocalDate day, Pageable pageable);
 
-	List<ContentRecommendRes> findRecommendedContents(ContentType contentType);
+	List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType);
   
 	List<LocalDate> findContentsByUserIdAndDateRange(Long id, LocalDate start, LocalDate end);
 
