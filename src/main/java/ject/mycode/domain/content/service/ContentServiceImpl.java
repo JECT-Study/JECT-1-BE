@@ -95,8 +95,11 @@ public class ContentServiceImpl implements ContentService {
 
 	@Override
 	public List<ContentRecommendRes> getRecommendedContents(User user, ContentType contentType) {
-		return contentQueryRepository.findRecommendedContents(user.getId(), contentType);
-	}
+        // User가 null이면 userId도 null로 전달
+        Long userId = (user != null) ? user.getId() : null;
+
+        return contentQueryRepository.findRecommendedContents(userId, contentType);
+    }
 
 	@Override
 	public List<HotContentRes> getHotContents() {

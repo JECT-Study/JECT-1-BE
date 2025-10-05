@@ -1,6 +1,7 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -438,21 +439,20 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
     public List<ContentRegionRes> findRecommendedByUserRegion(Long userId) {
         LocalDate today = LocalDate.now();
 
-        // 1. 사용자 선호 지역 ID 목록을 JPA Repository를 통해 미리 조회 (핵심)
-        // 이 메서드는 UserRegionRepository에 정의되어 있다고 가정합니다.
-        List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
-                .map(userRegion -> userRegion.getRegion().getId())
-                .collect(Collectors.toList());
+        // 1. 사용자 선호 지역 ID 목록 조회 (userId가 null이면 조회하지 않음)
+        List<Long> preferredRegionIds = new ArrayList<>();
+        if (userId != null) { // userId가 null이 아닐 때만 선호 지역 조회
+            preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
+                    // UserRegion 엔티티에서 Region 엔티티의 ID를 추출
+                    .map(userRegion -> userRegion.getRegion().getId())
+                    .collect(Collectors.toList());
+        }
 
-        // 2. 지역 조건(BooleanExpression) 동적 생성
-        BooleanExpression regionFilter;
-
-        if (preferredRegionIds.isEmpty()) {
-            // (A) 선호 지역이 없을 경우: 필터 조건 없음 (null) = 전국구 조회
-            regionFilter = null;
-        } else {
-            // (B) 선호 지역이 있을 경우: IN 절 조건 적용
-            // Querydsl의 기본 필드(region.id)를 사용하여 목록에 포함되는 조건 생성
+        // 2. 지역 조건(BooleanExpression) 생성
+        // userId가 null이거나 선호 지역이 설정되어 있을 때만 지역 필터를 적용합니다.
+        BooleanExpression regionFilter = null;
+        if (!preferredRegionIds.isEmpty()) {
+            // content 엔티티에 region 필드가 있다고 가정하고, 해당 ID가 리스트에 포함되는 조건 생성
             regionFilter = content.region.id.in(preferredRegionIds);
         }
 
