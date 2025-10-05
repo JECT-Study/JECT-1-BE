@@ -12,7 +12,7 @@ public interface ContentService {
 
 	ContentDetailsRes getContentDetails(User user, Long contentId);
 
-	List<ContentRecommendRes> getRecommendedContents(ContentType contentType);
+	List<ContentRecommendRes> getRecommendedContents(User user, ContentType contentType);
 
 	List<HotContentRes> getHotContents();
 

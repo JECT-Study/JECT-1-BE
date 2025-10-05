@@ -3,7 +3,6 @@ package ject.mycode.domain.home.controller;
 
 import ject.mycode.domain.auth.jwt.annotation.CurrentUser;
 import ject.mycode.domain.content.dto.*;
-import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.content.service.ContentService;
 import ject.mycode.domain.user.entity.User;
@@ -30,7 +29,7 @@ public class HomeController{
             @CurrentUser User user
     ) {
         return new BaseResponse<>(BaseResponseCode.GET_RECOMMENDED_CONTENT,
-                contentService.getRecommendedContents(contentType));
+                contentService.getRecommendedContents(user, contentType));
     }
 
     @GetMapping("/festival/hot")

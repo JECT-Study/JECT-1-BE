@@ -94,8 +94,8 @@ public class ContentServiceImpl implements ContentService {
 	}
 
 	@Override
-	public List<ContentRecommendRes> getRecommendedContents(ContentType contentType) {
-		return contentQueryRepository.findRecommendedContents(contentType);
+	public List<ContentRecommendRes> getRecommendedContents(User user, ContentType contentType) {
+		return contentQueryRepository.findRecommendedContents(user.getId(), contentType);
 	}
 
 	@Override
