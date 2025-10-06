@@ -19,7 +19,8 @@ public class CorsConfig {
                 "http://localhost:8081",
                 "http://localhost:8082",
                 "https://mycode-ruddy.vercel.app",
-                "https://mycode.expo.app/"
+                "https://mycode.expo.app/",
+                "https://mycodemycode.site"
         ));
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
