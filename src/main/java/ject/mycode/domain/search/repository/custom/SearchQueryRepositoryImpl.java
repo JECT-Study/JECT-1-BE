@@ -72,21 +72,38 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     }
 
     @Override
-    public Page<Content> getSearchResults(String keyword, ContentType category, String region, Pageable pageable)  {
+    public Page<Content> getSearchResults(String keyword, ContentType category, List<String> regions, Pageable pageable)  {
+
+        QContent content = QContent.content;
 
         BooleanBuilder builder = new BooleanBuilder();
 
+        // 1. 키워드 조건 추가
         if (keyword != null && !keyword.isBlank()) {
             builder.and(content.title.containsIgnoreCase(keyword)
                     .or(content.address.containsIgnoreCase(keyword)));
         }
+
+        // 2. 카테고리 조건 추가
         if (category != null) {
             builder.and(content.contentType.eq(category));
         }
-        if (region != null && !region.isBlank()) {
-            builder.and(content.address.containsIgnoreCase(region));
+
+        // 3. 다중 지역(Regions) 조건 추가
+        if (regions != null && !regions.isEmpty()) {
+            BooleanBuilder regionBuilder = new BooleanBuilder();
+
+            // regions 리스트에 있는 모든 지역에 대해 OR 조건을 생성합니다.
+            for (String region : regions) {
+                // 주소에 해당 지역명이 포함되는 경우 (기존 로직 유지)
+                regionBuilder.or(content.address.containsIgnoreCase(region));
+            }
+
+            // 전체 쿼리 빌더에 지역 조건 추가
+            builder.and(regionBuilder);
         }
 
+        // 4. 데이터 조회 (페이징 적용)
         List<Content> results = queryFactory
                 .selectFrom(content)
                 .where(builder)
@@ -94,11 +111,13 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
                 .limit(pageable.getPageSize())
                 .fetch();
 
+        // 5. 전체 개수 조회
         long total = queryFactory
                 .selectFrom(content)
                 .where(builder)
                 .fetchCount();
 
+        // 6. Page 객체 반환
         return new PageImpl<>(results, pageable, total);
     }
 
