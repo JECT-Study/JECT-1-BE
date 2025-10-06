@@ -13,6 +13,6 @@ public interface SearchService {
     void deleteKeyword(User user, String keyword);
     void deleteAllKeywords(User user);
     List<String> getPopularKeywords();
-    SearchResultRes getSearchResults(String keyword, ContentType category, String region, int page, int size);
+    SearchResultRes getSearchResults(String keyword, ContentType category, List<String> regions, int page, int size);
 }
 

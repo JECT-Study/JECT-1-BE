@@ -137,28 +137,34 @@ public class SearchServiceImpl implements SearchService {
         return searchQueryRepository.findTop10PopularKeywords();
     }
 
-    public SearchResultRes getSearchResults(String keyword, ContentType category, String region, int page, int size) {
+    public SearchResultRes getSearchResults(String keyword, ContentType category, List<String> regions, int page, int size) {
 
+        // 1. 페이지 요청 정보 생성
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Content> contentPage = searchQueryRepository.getSearchResults(keyword, category, region, pageable);
+        // 2. Repository 호출 시 regions 리스트 전달
+        //    (Repository 메서드 시그니처도 List<String> regions로 변경되어야 합니다)
+        Page<Content> contentPage = searchQueryRepository.getSearchResults(keyword, category, regions, pageable);
 
         List<Content> contentList = contentPage.getContent();
-        // 썸네일 map 조회
+
+        // 3. 썸네일 map 조회 (변경 없음)
         Map<Long, String> thumbnailMap = contentImageQueryRepository.findThumbnailUrlsByContentIds(
                 contentList.stream().map(Content::getId).toList()
         );
 
+        // 4. 결과 DTO 생성 (변경 없음)
         List<ContentResultRes> dtos = contentPage.getContent().stream()
                 .map(c -> new ContentResultRes(
                         c.getId(),
                         c.getTitle(),
                         c.getContentType(),
-                        c.getAddress(),
+                        c.getAddress(), // Content 엔티티에 지역 정보가 있다면 사용
                         thumbnailMap.get(c.getId())
                 ))
                 .toList();
 
+        // 5. 페이지 정보 응답 (변경 없음)
         PageInfoRes pageInfo = new PageInfoRes(
                 page,
                 contentPage.getTotalPages(),

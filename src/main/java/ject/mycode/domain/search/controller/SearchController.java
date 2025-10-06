@@ -62,11 +62,11 @@ public class SearchController {
     public BaseResponse<SearchResultRes> searchContents(
             @RequestParam String keyword,
             @RequestParam(required = false) ContentType category,
-            @RequestParam(required = false) String region,
+            @RequestParam(required = false) List<String> regions,
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        SearchResultRes result = searchService.getSearchResults(keyword, category, region, page, size);
+        SearchResultRes result = searchService.getSearchResults(keyword, category, regions, page, size);
         return new BaseResponse<>(BaseResponseCode.SEARCH_RESULT_SUCCESS, result);
     }
 }
