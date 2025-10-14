@@ -1,17 +1,19 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
+import org.springframework.data.util.Pair;
+import com.querydsl.core.types.dsl.*;
 import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.content.entity.Content;
+import ject.mycode.domain.contentTrait.entity.ContentTrait;
+import ject.mycode.domain.contentTrait.repository.ContentTraitRepository;
 import ject.mycode.domain.region.entity.QUserRegion;
 import ject.mycode.domain.region.repository.UserRegionRepository;
+import ject.mycode.domain.trait.entity.UserTrait;
+import ject.mycode.domain.trait.repository.UserTraitRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +21,6 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -51,6 +52,8 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QSchedule schedule = QSchedule.schedule;
 	private final QUserRegion userRegion = QUserRegion.userRegion;
     private final UserRegionRepository userRegionRepository;
+    private final UserTraitRepository userTraitRepository;
+    private final ContentTraitRepository  contentTraitRepository;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
@@ -216,57 +219,86 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
 
-	@Override
-	public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
-		LocalDate today = LocalDate.now();
+    @Override
+    public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
 
-        // 1. 사용자 선호 지역 ID 목록 조회
+        // 사용자 선호 지역 조회
         List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
-        // UserRegion 엔티티에서 Region 엔티티의 ID를 추출
-                .map(userRegion -> userRegion.getRegion().getId())
+                .map(ur -> ur.getRegion().getId())
                 .collect(Collectors.toList());
 
-        // 2. 지역 조건(BooleanExpression) 생성
-        // 선호 지역이 설정되어 있을 때만 지역 필터를 적용합니다.
-        BooleanExpression regionFilter = null;
-        if (!preferredRegionIds.isEmpty()) {
-        // content 엔티티에 region 필드가 있다고 가정하고, 해당 ID가 리스트에 포함되는 조건 생성
-            regionFilter = content.region.id.in(preferredRegionIds);
+        BooleanExpression regionFilter = preferredRegionIds.isEmpty() ? null : content.region.id.in(preferredRegionIds);
+
+        // 콘텐츠 기본 리스트 조회
+        List<Content> contents = qf.selectFrom(content)
+                .where(content.contentType.eq(contentType), regionFilter)
+                .fetch();
+
+        // 사용자 성향 조회
+        List<UserTrait> userTraits = userTraitRepository.findAllByUserId(userId);
+        if (userTraits.isEmpty()) {
+            // 성향 정보 없으면 종료일 기준 상위 9개 반환
+            return contents.stream()
+                    .sorted(Comparator.comparing(Content::getEndDate).reversed())
+                    .limit(9)
+                    .map(ContentRecommendRes::fromEntity)
+                    .collect(Collectors.toList());
         }
-        // 지역 설정이 없을 경우 (preferredRegionIds.isEmpty()) regionFilter는 null로 유지되며,
-        // 쿼리의 WHERE 절에 포함되지 않아 '전국' 콘텐츠를 조회하게 됩니다.
 
-		NumberExpression<Integer> statusOrder = new CaseBuilder()
-				.when(content.endDate.goe(today)).then(0)
-				.otherwise(1);
+        // 코사인 유사도 기반 추천 (Pair<Content, similarity>)
+        List<Pair<Content, Double>> scoredContents = new ArrayList<>();
 
-		return qf
-				.select(Projections.constructor(
-						ContentRecommendRes.class,
-						content.id,
-						content.title,
-						JPAExpressions.select(contentImageSub.imageUrl.min())
-								.from(contentImageSub)
-								.where(contentImageSub.content.eq(content)),
-						content.contentType,
-						content.address,
-						content.longitude,
-						content.latitude,
-						content.startDate.stringValue(),
-						content.endDate.stringValue()
-				))
-				.from(content)
-				.where(content.contentType.eq(contentType), regionFilter)
-				.orderBy(
-						statusOrder.asc(),
-						content.endDate.asc(),
-						content.startDate.asc()
-				)
-				.limit(9)
-				.fetch();
-  }
+        for (Content c : contents) {
+            List<ContentTrait> contentTraits = contentTraitRepository.findAllByContentId(c.getId());
+            if (contentTraits.isEmpty()) continue;
 
-	@Override
+            double dotProduct = 0;
+            double userNorm = 0;
+            double contentNorm = 0;
+
+            for (UserTrait ut : userTraits) {
+                Optional<ContentTrait> optCt = contentTraits.stream()
+                        .filter(ct -> ct.getTrait().getId().equals(ut.getTrait().getId()))
+                        .findFirst();
+
+                int contentScore = optCt.map(ContentTrait::getTotalScore).orElse(0);
+                int userScore = ut.getTotalScore();
+
+                dotProduct += userScore * contentScore;
+                userNorm += userScore * userScore;
+                contentNorm += contentScore * contentScore;
+            }
+
+            if (userNorm == 0 || contentNorm == 0) continue;
+
+            double similarity = dotProduct / (Math.sqrt(userNorm) * Math.sqrt(contentNorm));
+
+            // 코사인 유사도 0 이상만 Pair로 저장
+            if (similarity >= 0) {
+                scoredContents.add(Pair.of(c, similarity));
+            }
+        }
+
+        // 유사도 점수 기준 내림차순 정렬
+        List<Pair<Content, Double>> top9 = scoredContents.stream()
+                .sorted((p1, p2) -> Double.compare(p2.getSecond(), p1.getSecond())) // getSecond()
+                .limit(9)
+                .collect(Collectors.toList());
+
+        // 상위 9개만 로그 찍기
+        top9.forEach(p -> System.out.println(
+                "Content ID: " + p.getFirst().getId() +
+                        ", Title: " + p.getFirst().getTitle() +
+                        ", Cosine Similarity: " + p.getSecond()
+        ));
+
+        // ContentRecommendRes로 변환 후 반환
+        return top9.stream()
+                .map(p -> ContentRecommendRes.fromEntity(p.getFirst()))
+                .collect(Collectors.toList());
+    }
+
+    @Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
 		return qf
 			.select(schedule.scheduleDate)
