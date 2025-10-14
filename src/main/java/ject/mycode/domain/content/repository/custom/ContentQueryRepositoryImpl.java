@@ -4,14 +4,17 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Order;
 import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.dsl.BooleanExpression;
-import com.querydsl.core.types.dsl.CaseBuilder;
-import com.querydsl.core.types.dsl.NumberExpression;
+import com.querydsl.core.types.SubQueryExpression;
+import com.querydsl.core.types.dsl.*;
 import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.content.entity.Content;
+import ject.mycode.domain.contentTrait.entity.ContentTrait;
 import ject.mycode.domain.contentTrait.entity.QContentTrait;
 import ject.mycode.domain.region.entity.QUserRegion;
 import ject.mycode.domain.region.repository.UserRegionRepository;
@@ -24,7 +27,6 @@ import org.springframework.stereotype.Repository;
 
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
-import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 
@@ -226,88 +228,79 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
     public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
         LocalDate today = LocalDate.now();
 
-        // 1. 사용자 선호 지역 ID 목록 조회 및 필터 생성
+        // ️사용자 선호 지역 ID 목록 조회
         List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
                 .map(userRegion -> userRegion.getRegion().getId())
                 .collect(Collectors.toList());
 
-        BooleanExpression regionFilter = null;
-        if (!preferredRegionIds.isEmpty()) {
-            regionFilter = content.region.id.in(preferredRegionIds);
-        }
+        BooleanExpression regionFilter = preferredRegionIds.isEmpty() ? null : content.region.id.in(preferredRegionIds);
 
-        // 2. 날짜 기반 정렬 로직
-        NumberExpression<Integer> statusOrder = new CaseBuilder()
-                .when(content.endDate.goe(today)).then(0)
-                .otherwise(1);
-
-        // 3. 사용자 선호 특성 정보 조회
+        // 사용자 trait 조회
         List<UserTrait> userTraits = userTraitRepository.findAllByUserId(userId);
 
-        // 4. 특성 기반 가중치 추천 점수 계산
-        NumberExpression<Long> finalRecommendScoreExpression;
-        OrderSpecifier<?> finalRecommendOrder;
+        QContentTrait contentTrait = QContentTrait.contentTrait;
 
-        if (userTraits.isEmpty()) {
-            // userTraits가 없으면 종료일 기준으로 정렬
-            finalRecommendOrder = content.endDate.desc();
-        } else {
-            // userTraits가 있을 때: 가중치 점수 계산
-            QContentTrait contentTrait = QContentTrait.contentTrait;
-
-            NumberExpression<Long> weightedScore = Expressions.asNumber(0L);
-
-            for (UserTrait ut : userTraits) {
-                weightedScore = weightedScore.add(
-                        new CaseBuilder()
-                                .when(contentTrait.trait.id.eq(ut.getTrait().getId()))
-                                .then(contentTrait.totalScore.longValue().multiply(ut.getTotalScore()))
-                                .otherwise(0L)
-                );
-            }
-
-            NumberExpression<Long> sumWithNullCheck = weightedScore.sum().coalesce(0L);
-
-            finalRecommendScoreExpression = (NumberExpression<Long>) JPAExpressions
-                    .select(sumWithNullCheck)
-                    .from(contentTrait)
-                    .where(contentTrait.content.eq(content));
-
-            finalRecommendOrder = finalRecommendScoreExpression.desc();
-        }
-
-        // 5. QueryDSL 쿼리 실행
-        return qf
-                .select(Projections.constructor(
-                        ContentRecommendRes.class,
-                        content.id,
-                        content.title,
-                        JPAExpressions.select(contentImageSub.imageUrl.min())
-                                .from(contentImageSub)
-                                .where(contentImageSub.content.eq(content)),
-                        content.contentType,
-                        content.address,
-                        content.longitude,
-                        content.latitude,
-                        content.startDate.stringValue(),
-                        content.endDate.stringValue()
-                ))
-                .from(content)
-                .where(
-                        content.contentType.eq(contentType),
-                        regionFilter
-                )
-                .orderBy(
-                        statusOrder.asc(),
-                        finalRecommendOrder,
-                        content.endDate.asc(),
-                        content.startDate.asc()
-                )
-                .limit(9)
+        // 콘텐츠 조회 (이미지는 join 대신 fetch 후 Stream에서 가져오기)
+        List<Content> contents = qf
+                .selectFrom(content)
+                .where(content.contentType.eq(contentType), regionFilter)
                 .fetch();
+
+        // Stream에서 이미지와 정규화 점수 계산
+        return contents.stream()
+                .map(c -> {
+                    // 콘텐츠 trait 총합
+                    Long totalContentScore = Long.valueOf(qf
+                            .select(contentTrait.totalScore.sum().coalesce(0))
+                            .from(contentTrait)
+                            .where(contentTrait.content.eq(c))
+                            .fetchOne());
+                    if (totalContentScore == null || totalContentScore == 0) totalContentScore = 1L;
+
+                    // 정규화 점수 계산
+                    double normalizedScore = 0.0;
+                    for (UserTrait ut : userTraits) {
+                        Long traitScore = Long.valueOf(qf
+                                .select(contentTrait.totalScore)
+                                .from(contentTrait)
+                                .where(contentTrait.content.eq(c)
+                                        .and(contentTrait.trait.eq(ut.getTrait())))
+                                .fetchOne());
+                        if (traitScore != null) {
+                            normalizedScore += ((double) traitScore / totalContentScore) * ut.getTotalScore();
+                        }
+                    }
+
+                    // 이미지 fetch
+                    String imageUrl = qf
+                            .select(contentImageSub.imageUrl.min())
+                            .from(contentImageSub)
+                            .where(contentImageSub.content.eq(c))
+                            .fetchOne();
+
+                    // ContentRecommendRes 생성
+                    ContentRecommendRes res = new ContentRecommendRes(
+                            c.getId(),
+                            c.getTitle(),
+                            imageUrl,
+                            c.getContentType(),
+                            c.getAddress(),
+                            c.getLongitude(),
+                            c.getLatitude(),
+                            c.getStartDate().toString(),
+                            c.getEndDate().toString()
+                    );
+
+                    return Map.entry(res, normalizedScore);
+                })
+                // 5️⃣ 정규화 점수 기준 내림차순 정렬
+                .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
+                .limit(9)
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
     }
 
-	@Override
+    @Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
 		return qf
 			.select(schedule.scheduleDate)
