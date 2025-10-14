@@ -6,12 +6,17 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.querydsl.core.types.Order;
+import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.CaseBuilder;
 import com.querydsl.core.types.dsl.NumberExpression;
 import ject.mycode.domain.content.dto.*;
+import ject.mycode.domain.contentTrait.entity.QContentTrait;
 import ject.mycode.domain.region.entity.QUserRegion;
 import ject.mycode.domain.region.repository.UserRegionRepository;
+import ject.mycode.domain.trait.entity.UserTrait;
+import ject.mycode.domain.trait.repository.UserTraitRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -51,6 +56,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QSchedule schedule = QSchedule.schedule;
 	private final QUserRegion userRegion = QUserRegion.userRegion;
     private final UserRegionRepository userRegionRepository;
+    private final UserTraitRepository userTraitRepository;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
@@ -216,55 +222,90 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
 
-	@Override
-	public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
-		LocalDate today = LocalDate.now();
+    @Override
+    public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
+        LocalDate today = LocalDate.now();
 
-        // 1. 사용자 선호 지역 ID 목록 조회
+        // 1. 사용자 선호 지역 ID 목록 조회 및 필터 생성
         List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
-        // UserRegion 엔티티에서 Region 엔티티의 ID를 추출
                 .map(userRegion -> userRegion.getRegion().getId())
                 .collect(Collectors.toList());
 
-        // 2. 지역 조건(BooleanExpression) 생성
-        // 선호 지역이 설정되어 있을 때만 지역 필터를 적용합니다.
         BooleanExpression regionFilter = null;
         if (!preferredRegionIds.isEmpty()) {
-        // content 엔티티에 region 필드가 있다고 가정하고, 해당 ID가 리스트에 포함되는 조건 생성
             regionFilter = content.region.id.in(preferredRegionIds);
         }
-        // 지역 설정이 없을 경우 (preferredRegionIds.isEmpty()) regionFilter는 null로 유지되며,
-        // 쿼리의 WHERE 절에 포함되지 않아 '전국' 콘텐츠를 조회하게 됩니다.
 
-		NumberExpression<Integer> statusOrder = new CaseBuilder()
-				.when(content.endDate.goe(today)).then(0)
-				.otherwise(1);
+        // 2. 날짜 기반 정렬 로직
+        NumberExpression<Integer> statusOrder = new CaseBuilder()
+                .when(content.endDate.goe(today)).then(0)
+                .otherwise(1);
 
-		return qf
-				.select(Projections.constructor(
-						ContentRecommendRes.class,
-						content.id,
-						content.title,
-						JPAExpressions.select(contentImageSub.imageUrl.min())
-								.from(contentImageSub)
-								.where(contentImageSub.content.eq(content)),
-						content.contentType,
-						content.address,
-						content.longitude,
-						content.latitude,
-						content.startDate.stringValue(),
-						content.endDate.stringValue()
-				))
-				.from(content)
-				.where(content.contentType.eq(contentType), regionFilter)
-				.orderBy(
-						statusOrder.asc(),
-						content.endDate.asc(),
-						content.startDate.asc()
-				)
-				.limit(9)
-				.fetch();
-  }
+        // 3. 사용자 선호 특성 정보 조회
+        List<UserTrait> userTraits = userTraitRepository.findAllByUserId(userId);
+
+        // 4. 특성 기반 가중치 추천 점수 계산
+        NumberExpression<Long> finalRecommendScoreExpression;
+        OrderSpecifier<?> finalRecommendOrder;
+
+        if (userTraits.isEmpty()) {
+            // userTraits가 없으면 종료일 기준으로 정렬
+            finalRecommendOrder = content.endDate.desc();
+        } else {
+            // userTraits가 있을 때: 가중치 점수 계산
+            QContentTrait contentTrait = QContentTrait.contentTrait;
+
+            NumberExpression<Long> weightedScore = Expressions.asNumber(0L);
+
+            for (UserTrait ut : userTraits) {
+                weightedScore = weightedScore.add(
+                        new CaseBuilder()
+                                .when(contentTrait.trait.id.eq(ut.getTrait().getId()))
+                                .then(contentTrait.totalScore.longValue().multiply(ut.getTotalScore()))
+                                .otherwise(0L)
+                );
+            }
+
+            NumberExpression<Long> sumWithNullCheck = weightedScore.sum().coalesce(0L);
+
+            finalRecommendScoreExpression = (NumberExpression<Long>) JPAExpressions
+                    .select(sumWithNullCheck)
+                    .from(contentTrait)
+                    .where(contentTrait.content.eq(content));
+
+            finalRecommendOrder = finalRecommendScoreExpression.desc();
+        }
+
+        // 5. QueryDSL 쿼리 실행
+        return qf
+                .select(Projections.constructor(
+                        ContentRecommendRes.class,
+                        content.id,
+                        content.title,
+                        JPAExpressions.select(contentImageSub.imageUrl.min())
+                                .from(contentImageSub)
+                                .where(contentImageSub.content.eq(content)),
+                        content.contentType,
+                        content.address,
+                        content.longitude,
+                        content.latitude,
+                        content.startDate.stringValue(),
+                        content.endDate.stringValue()
+                ))
+                .from(content)
+                .where(
+                        content.contentType.eq(contentType),
+                        regionFilter
+                )
+                .orderBy(
+                        statusOrder.asc(),
+                        finalRecommendOrder,
+                        content.endDate.asc(),
+                        content.startDate.asc()
+                )
+                .limit(9)
+                .fetch();
+    }
 
 	@Override
 	public List<LocalDate> findContentsByUserIdAndDateRange(Long userId, LocalDate start, LocalDate end) {
