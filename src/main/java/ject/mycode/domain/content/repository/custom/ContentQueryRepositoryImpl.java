@@ -1,21 +1,15 @@
 package ject.mycode.domain.content.repository.custom;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import com.querydsl.core.Tuple;
-import com.querydsl.core.types.Order;
-import com.querydsl.core.types.OrderSpecifier;
-import com.querydsl.core.types.SubQueryExpression;
+import org.springframework.data.util.Pair;
 import com.querydsl.core.types.dsl.*;
 import ject.mycode.domain.content.dto.*;
 import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.contentTrait.entity.ContentTrait;
-import ject.mycode.domain.contentTrait.entity.QContentTrait;
+import ject.mycode.domain.contentTrait.repository.ContentTraitRepository;
 import ject.mycode.domain.region.entity.QUserRegion;
 import ject.mycode.domain.region.repository.UserRegionRepository;
 import ject.mycode.domain.trait.entity.UserTrait;
@@ -59,6 +53,7 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	private final QUserRegion userRegion = QUserRegion.userRegion;
     private final UserRegionRepository userRegionRepository;
     private final UserTraitRepository userTraitRepository;
+    private final ContentTraitRepository  contentTraitRepository;
 
 	@Override
 	public ContentDetailsRes findDetailsByContentId(User user, Long contentId) {
@@ -226,77 +221,80 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 
     @Override
     public List<ContentRecommendRes> findRecommendedContents(Long userId, ContentType contentType) {
-        LocalDate today = LocalDate.now();
 
-        // ️사용자 선호 지역 ID 목록 조회
+        // 사용자 선호 지역 조회
         List<Long> preferredRegionIds = userRegionRepository.findAllByUserId(userId).stream()
-                .map(userRegion -> userRegion.getRegion().getId())
+                .map(ur -> ur.getRegion().getId())
                 .collect(Collectors.toList());
 
         BooleanExpression regionFilter = preferredRegionIds.isEmpty() ? null : content.region.id.in(preferredRegionIds);
 
-        // 사용자 trait 조회
-        List<UserTrait> userTraits = userTraitRepository.findAllByUserId(userId);
-
-        QContentTrait contentTrait = QContentTrait.contentTrait;
-
-        // 콘텐츠 조회 (이미지는 join 대신 fetch 후 Stream에서 가져오기)
-        List<Content> contents = qf
-                .selectFrom(content)
+        // 콘텐츠 기본 리스트 조회
+        List<Content> contents = qf.selectFrom(content)
                 .where(content.contentType.eq(contentType), regionFilter)
                 .fetch();
 
-        // Stream에서 이미지와 정규화 점수 계산
-        return contents.stream()
-                .map(c -> {
-                    // 콘텐츠 trait 총합
-                    Long totalContentScore = Long.valueOf(qf
-                            .select(contentTrait.totalScore.sum().coalesce(0))
-                            .from(contentTrait)
-                            .where(contentTrait.content.eq(c))
-                            .fetchOne());
-                    if (totalContentScore == null || totalContentScore == 0) totalContentScore = 1L;
+        // 사용자 성향 조회
+        List<UserTrait> userTraits = userTraitRepository.findAllByUserId(userId);
+        if (userTraits.isEmpty()) {
+            // 성향 정보 없으면 종료일 기준 상위 9개 반환
+            return contents.stream()
+                    .sorted(Comparator.comparing(Content::getEndDate).reversed())
+                    .limit(9)
+                    .map(ContentRecommendRes::fromEntity)
+                    .collect(Collectors.toList());
+        }
 
-                    // 정규화 점수 계산
-                    double normalizedScore = 0.0;
-                    for (UserTrait ut : userTraits) {
-                        Long traitScore = Long.valueOf(qf
-                                .select(contentTrait.totalScore)
-                                .from(contentTrait)
-                                .where(contentTrait.content.eq(c)
-                                        .and(contentTrait.trait.eq(ut.getTrait())))
-                                .fetchOne());
-                        if (traitScore != null) {
-                            normalizedScore += ((double) traitScore / totalContentScore) * ut.getTotalScore();
-                        }
-                    }
+        // 코사인 유사도 기반 추천 (Pair<Content, similarity>)
+        List<Pair<Content, Double>> scoredContents = new ArrayList<>();
 
-                    // 이미지 fetch
-                    String imageUrl = qf
-                            .select(contentImageSub.imageUrl.min())
-                            .from(contentImageSub)
-                            .where(contentImageSub.content.eq(c))
-                            .fetchOne();
+        for (Content c : contents) {
+            List<ContentTrait> contentTraits = contentTraitRepository.findAllByContentId(c.getId());
+            if (contentTraits.isEmpty()) continue;
 
-                    // ContentRecommendRes 생성
-                    ContentRecommendRes res = new ContentRecommendRes(
-                            c.getId(),
-                            c.getTitle(),
-                            imageUrl,
-                            c.getContentType(),
-                            c.getAddress(),
-                            c.getLongitude(),
-                            c.getLatitude(),
-                            c.getStartDate().toString(),
-                            c.getEndDate().toString()
-                    );
+            double dotProduct = 0;
+            double userNorm = 0;
+            double contentNorm = 0;
 
-                    return Map.entry(res, normalizedScore);
-                })
-                // 5️⃣ 정규화 점수 기준 내림차순 정렬
-                .sorted((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()))
+            for (UserTrait ut : userTraits) {
+                Optional<ContentTrait> optCt = contentTraits.stream()
+                        .filter(ct -> ct.getTrait().getId().equals(ut.getTrait().getId()))
+                        .findFirst();
+
+                int contentScore = optCt.map(ContentTrait::getTotalScore).orElse(0);
+                int userScore = ut.getTotalScore();
+
+                dotProduct += userScore * contentScore;
+                userNorm += userScore * userScore;
+                contentNorm += contentScore * contentScore;
+            }
+
+            if (userNorm == 0 || contentNorm == 0) continue;
+
+            double similarity = dotProduct / (Math.sqrt(userNorm) * Math.sqrt(contentNorm));
+
+            // 코사인 유사도 0 이상만 Pair로 저장
+            if (similarity >= 0) {
+                scoredContents.add(Pair.of(c, similarity));
+            }
+        }
+
+        // 유사도 점수 기준 내림차순 정렬
+        List<Pair<Content, Double>> top9 = scoredContents.stream()
+                .sorted((p1, p2) -> Double.compare(p2.getSecond(), p1.getSecond())) // getSecond()
                 .limit(9)
-                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // 상위 9개만 로그 찍기
+        top9.forEach(p -> System.out.println(
+                "Content ID: " + p.getFirst().getId() +
+                        ", Title: " + p.getFirst().getTitle() +
+                        ", Cosine Similarity: " + p.getSecond()
+        ));
+
+        // ContentRecommendRes로 변환 후 반환
+        return top9.stream()
+                .map(p -> ContentRecommendRes.fromEntity(p.getFirst()))
                 .collect(Collectors.toList());
     }
 

@@ -1,5 +1,6 @@
 package ject.mycode.domain.content.dto;
 
+import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.enums.ContentType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,5 +22,20 @@ public class ContentRecommendRes {
     private double latitude;
     private String startDate;
     private String endDate;
-}
 
+    public static ContentRecommendRes fromEntity(Content content) {
+        String imageUrl = content.getImages().isEmpty() ? null : content.getImages().get(0).getImageUrl();
+
+        return new ContentRecommendRes(
+                content.getId(),
+                content.getTitle(),
+                imageUrl,
+                content.getContentType(),
+                content.getAddress(),
+                content.getLongitude(),
+                content.getLatitude(),
+                content.getStartDate().toString(),
+                content.getEndDate().toString()
+        );
+    }
+}

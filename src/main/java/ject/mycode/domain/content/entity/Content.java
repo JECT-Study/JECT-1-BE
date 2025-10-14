@@ -2,6 +2,7 @@ package ject.mycode.domain.content.entity;
 
 import jakarta.persistence.*;
 import ject.mycode.domain.content.enums.ContentType;
+import ject.mycode.domain.contentImage.entity.ContentImage;
 import ject.mycode.domain.contentTrait.entity.ContentTrait;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.user.enums.ContentStatus;
@@ -10,6 +11,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -81,6 +83,9 @@ public class Content extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "region_id")
     private Region region;
+
+    @OneToMany(mappedBy = "content", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ContentImage> images = new ArrayList<>();
 
     public void setViews(int views) {
         this.views = views;
