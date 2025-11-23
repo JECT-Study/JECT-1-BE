@@ -56,6 +56,7 @@ public class HomeController{
                 contentService.getSameCategoryContents(contentType));
     }
 
+    // 이런 축제 어때요 api
     @GetMapping("/festival/recommend")
     public BaseResponse<List<ContentRegionRes>> getRecommendedFestivals(@CurrentUser User user) {
         Long userId = Long.valueOf(user.getId());
