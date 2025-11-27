@@ -89,26 +89,35 @@ public class JwtProvider {
     // AccessToken 유효성 확인
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = getClaims(token);
-            return claims.getBody().getExpiration().after(Date.from(Instant.now()));
+            getClaims(token);
+            return true;
+        } catch (ExpiredJwtException e) {
+            return false;  // Expired
         } catch (JwtException e) {
-            log.error(e.getMessage());
-            return false;
-        } catch (Exception e) {
-            log.error(e.getMessage() + ": 토큰이 유효하지 않습니다.");
-            return false;
+            return false;  // Invalid
         }
     }
+
 
     // RefreshToken 유효성 확인
     public void validateRefreshToken(String refreshToken) {
-        String username = getSocialId(refreshToken);
+        try {
+            getClaims(refreshToken);  // 만료되면 ExpiredJwtException 발생
+        } catch (ExpiredJwtException e) {
+            throw new AuthHandler(BaseResponseCode.TOKEN_EXPIRED);
+        } catch (JwtException e) {
+            throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
+        }
 
-        //redis 확인
-        if (!redisUtil.exists(username)) {
+        String username = getSocialId(refreshToken);
+        String storedToken = redisUtil.get(username).toString();
+
+        // Redis에 저장된 refreshToken과 동일한지 검사
+        if (storedToken == null || !storedToken.equals(refreshToken)) {
             throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
         }
     }
+
 
     public String getSocialId(String token) {
         return getClaims(token).getBody().getSubject();
@@ -119,15 +128,12 @@ public class JwtProvider {
 
     //토큰의 클레임 가져오는 메서드
     public Jws<Claims> getClaims(String token) {
-        try {
-            return Jwts.parser()
-                    .setSigningKey(secret)
-                    .build()
-                    .parseClaimsJws(token);
-        } catch (Exception e) {
-            throw new AuthHandler(BaseResponseCode.INVALID_TOKEN);
-        }
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .build()
+                .parseClaimsJws(token);  // 예외는 그대로 던지기
     }
+
 
     // 토큰 재발급
     public JwtRes reissueToken(String refreshToken) throws SignatureException {
