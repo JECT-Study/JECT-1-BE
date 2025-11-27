@@ -498,10 +498,10 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
                         ContentRegionRes.class,
                         content.id,
                         content.title,
-                        content.address,
                         JPAExpressions.select(contentImageSub.imageUrl.min())
                                 .from(contentImageSub)
                                 .where(contentImageSub.content.eq(content)),
+                        content.address,
                         content.startDate.stringValue(),
                         content.endDate.stringValue()
                 ))
