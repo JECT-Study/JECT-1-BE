@@ -33,7 +33,8 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
         OrderSpecifier<?> orderSpecifier = getOrderSpecifier(sort);
 
         return queryFactory
-                .selectFrom(content)
+                .selectDistinct(content)   // ⭐ 중복 해결 핵심
+                .from(content)
                 .where(condition)
                 .orderBy(orderSpecifier)
                 .offset(offset)
@@ -46,8 +47,9 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
         BooleanExpression condition = content.title.containsIgnoreCase(keyword)
                 .or(content.address.containsIgnoreCase(keyword));
 
-        return Math.toIntExact(queryFactory
-                .select(content.count())
+        return Math.toIntExact(
+                queryFactory
+                .select(content.id.countDistinct())   // ⭐ ID 중복 제거하여 카운트
                 .from(content)
                 .where(condition)
                 .fetchOne());
@@ -113,7 +115,8 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
 
         // 5. 전체 개수 조회
         long total = queryFactory
-                .selectFrom(content)
+                .select(content.id.countDistinct())  // ⭐ 중복 방지
+                .from(content)
                 .where(builder)
                 .fetchCount();
 
@@ -134,7 +137,8 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
         }
 
         return queryFactory
-                .selectFrom(content)
+                .selectDistinct(content)  // ⭐ 혹시 모를 중복 예방
+                .from(content)
                 .orderBy(orderSpecifier)
                 .offset(offset)
                 .limit(limit)
@@ -144,7 +148,8 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     public int countAllContents() {
         QContent content = QContent.content;
         return Math.toIntExact(
-                queryFactory.select(content.count())
+                queryFactory
+                        .select(content.id.countDistinct()) // 중복예방
                         .from(content)
                         .fetchOne()
         );
