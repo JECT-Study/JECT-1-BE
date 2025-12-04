@@ -422,46 +422,47 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 	public Page<SchedulesInfoRes> findSchedulesByDate(Pageable pageable, LocalDate day) {
 		QContentImage contentImageSub = new QContentImage("contentImageSub");
 
-		List<SchedulesInfoRes> schedules = qf
-			.select(Projections.constructor(
-				SchedulesInfoRes.class,
-				content.id,
-				content.title,
-				contentImage.imageUrl,
-				content.address,
-				content.startDate,
-				content.endDate
-			))
-			.from(schedule)
-			.join(schedule.content, content)
-			.leftJoin(contentImage).on(
-				contentImage.id.eq(
-					JPAExpressions
-						.select(contentImageSub.id.min())
-						.from(contentImageSub)
-						.where(contentImageSub.content.eq(content))
-				)
-			)
-			.where(
-				content.startDate.loe(day),
-				content.endDate.goe(day),
-				content.status.eq(ContentStatus.ACTIVE)
-			)
-			.orderBy(content.endDate.asc())
-			.offset(pageable.getOffset())
-			.limit(pageable.getPageSize())
-			.fetch();
+        List<SchedulesInfoRes> schedules = qf
+                .select(Projections.constructor(
+                        SchedulesInfoRes.class,
+                        content.id,
+                        content.title,
+                        contentImage.imageUrl,
+                        content.address,
+                        content.startDate,
+                        content.endDate
+                ))
+                .distinct()
+                .from(schedule)
+                .join(schedule.content, content)
+                .leftJoin(contentImage).on(
+                        contentImage.id.eq(
+                                JPAExpressions
+                                        .select(contentImageSub.id.min())
+                                        .from(contentImageSub)
+                                        .where(contentImageSub.content.eq(content))
+                        )
+                )
+                .where(
+                        content.startDate.loe(day),
+                        content.endDate.goe(day),
+                        content.status.eq(ContentStatus.ACTIVE)
+                )
+                .orderBy(content.endDate.asc())
+                .offset(pageable.getOffset())
+                .limit(pageable.getPageSize())
+                .fetch();
 
-		Long total = qf
-			.select(content.count())
-			.from(schedule)
-			.join(schedule.content, content)
-			.where(
-				content.startDate.loe(day),
-				content.endDate.goe(day),
-				content.status.eq(ContentStatus.ACTIVE)
-			)
-			.fetchOne();
+        Long total = qf
+                .select(content.id.countDistinct())
+                .from(schedule)
+                .join(schedule.content, content)
+                .where(
+                        content.startDate.loe(day),
+                        content.endDate.goe(day),
+                        content.status.eq(ContentStatus.ACTIVE)
+                )
+                .fetchOne();
 
 		return new PageImpl<>(schedules, pageable, total != null ? total : 0);
 	}
