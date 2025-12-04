@@ -396,7 +396,8 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.longitude,
 						content.latitude,
 						content.startDate,
-						content.endDate
+						content.endDate,
+                        content.address
 				))
 				.from(content)
 				.leftJoin(contentImage).on(contentImage.content.eq(content))
@@ -407,7 +408,8 @@ public class ContentQueryRepositoryImpl implements ContentQueryRepository {
 						content.longitude,
 						content.latitude,
 						content.startDate,
-						content.endDate
+						content.endDate,
+                        content.address
 				)
 				.orderBy(
 						statusOrder.asc(), // 1차: 진행중 먼저
