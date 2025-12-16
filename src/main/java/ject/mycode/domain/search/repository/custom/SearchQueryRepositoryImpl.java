@@ -8,12 +8,15 @@ import ject.mycode.domain.content.entity.Content;
 import ject.mycode.domain.content.entity.QContent;
 import ject.mycode.domain.content.enums.ContentType;
 import ject.mycode.domain.search.entity.QSearchKeyword;
+import ject.mycode.domain.user.enums.ContentStatus;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -35,7 +38,11 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
         return queryFactory
                 .selectDistinct(content)   // ⭐ 중복 해결 핵심
                 .from(content)
-                .where(condition)
+                .where(
+                        content.status.eq(ContentStatus.ACTIVE)
+                                .and(isUpcomingEvent())  // ⭐ 추가
+                                .and(condition)
+                )
                 .orderBy(orderSpecifier)
                 .offset(offset)
                 .limit(limit)
@@ -56,10 +63,16 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     }
 
     private OrderSpecifier<?> getOrderSpecifier(String sort) {
-        if ("views".equalsIgnoreCase(sort)) {
-            return content.views.desc();
+        switch (sort != null ? sort.toLowerCase() : "") {
+            case "views":
+                return content.views.desc();
+            case "date":  // ⭐ 날짜 임박 순 (startDate ASC)
+                return content.startDate.asc();
+            case "enddate":  // 종료일 임박 순
+                return content.endDate.asc();
+            default:
+                return content.startDate.asc();  // 기본: 날짜순
         }
-        return content.createdAt.desc();
     }
 
     @Override
@@ -137,8 +150,12 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
         }
 
         return queryFactory
-                .selectDistinct(content)  // ⭐ 혹시 모를 중복 예방
+                .selectDistinct(content)  // 혹시 모를 중복 예방
                 .from(content)
+                .where(
+                        content.status.eq(ContentStatus.ACTIVE)  // 기존
+                                .and(isUpcomingEvent())                // ⭐ 추가
+                )
                 .orderBy(orderSpecifier)
                 .offset(offset)
                 .limit(limit)
@@ -153,6 +170,12 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
                         .from(content)
                         .fetchOne()
         );
+    }
+
+    private BooleanExpression isUpcomingEvent() {
+        LocalDateTime now = LocalDateTime.now();
+        return content.startDate.goe(LocalDate.from(now))  // 시작일이 현재 이후
+                .or(content.endDate.goe(LocalDate.from(now))); // 종료일이 현재 이후
     }
 
 }
