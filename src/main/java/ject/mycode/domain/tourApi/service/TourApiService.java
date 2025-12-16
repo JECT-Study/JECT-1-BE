@@ -10,10 +10,7 @@ import ject.mycode.domain.contentImage.entity.ContentImage;
 import ject.mycode.domain.contentImage.repository.ContentImageRepository;
 import ject.mycode.domain.region.entity.Region;
 import ject.mycode.domain.region.repository.RegionRepository;
-import ject.mycode.domain.tourApi.dto.DetailCommonResponse;
-import ject.mycode.domain.tourApi.dto.DetailInfoResponse;
-import ject.mycode.domain.tourApi.dto.DetailIntroResponse;
-import ject.mycode.domain.tourApi.dto.SearchFestivalResponse;
+import ject.mycode.domain.tourApi.dto.*;
 import ject.mycode.domain.user.enums.ContentStatus;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -120,20 +117,20 @@ public class TourApiService {
 						continue;
 					}
 
-					Content saved = contentRepository.save(entity);
+                    Content saved = contentRepository.save(entity);
 
-					// 이미지 저장: firstimage/firstimage2
-					List<String> images = collectFirstTwoImages(it, common);
-					for (String url : images) {
-						if (url == null || url.isBlank()) continue;
-						contentImageRepository.save(
-							ContentImage.builder().imageUrl(url.trim()).content(saved).build()
-						);
-						pageImagesSaved++; totalImagesSaved++;
-					}
+                    // 이미지 저장: firstimage/firstimage2
+                    List<String> images = collectFirstTwoImages(it, common);
+                    for (String url : images) {
+                        if (url == null || url.isBlank()) continue;
+                        contentImageRepository.save(
+                                ContentImage.builder().imageUrl(url.trim()).content(saved).build()
+                        );
+                        pageImagesSaved++; totalImagesSaved++;
+                    }
 
-					if (stats.overviewOk) { pageOverviewOk++; totalOverviewOk++; }
-					if (stats.homepageOk) { pageHomepageOk++; totalHomepageOk++; }
+                    if (stats.overviewOk) { pageOverviewOk++; totalOverviewOk++; }
+                    if (stats.homepageOk) { pageHomepageOk++; totalHomepageOk++; }
 					if (stats.hoursOk)    { pageHoursOk++;    totalHoursOk++; }
 					if (stats.placeOk)    { pagePlaceOk++;    totalPlaceOk++; }
 					if (stats.introFromList) { pageIntroFromList++; totalIntroFromList++; }
@@ -186,7 +183,6 @@ public class TourApiService {
 		return exchange(url, DetailCommonResponse.class);
 	}
 
-
 	private DetailInfoResponse detailInfo(String contentId, String contentTypeId) {
 		String url = String.format(
 			"%s/detailInfo2?MobileOS=ETC&MobileApp=MyApp&_type=json&contentId=%s&contentTypeId=%s&serviceKey=%s",
@@ -203,26 +199,26 @@ public class TourApiService {
 		return exchange(url, DetailIntroResponse.class);
 	}
 
-	private <T> T exchange(String url, Class<T> type) {
-		try {
-			ResponseEntity<String> res = restTemplate.exchange(
-				new URI(url), HttpMethod.GET, new HttpEntity<>(jsonHeaders()), String.class
-			);
-			String body = res.getBody();
+    private <T> T exchange(String url, Class<T> type) {
+        try {
+            ResponseEntity<String> res = restTemplate.exchange(
+                    new URI(url), HttpMethod.GET, new HttpEntity<>(jsonHeaders()), String.class
+            );
+            String body = res.getBody();
 
-			// ✅ 공통 로그 찍기
-			log.info("[TourAPI][exchange] url={} | raw={}", url, body);
+            // ✅ 공통 로그 찍기
+            log.info("[TourAPI][exchange] url={} | raw={}", url, body);
 
-			if (body == null || body.isBlank()) return null;
-			return mapper().readValue(body, type);
-		} catch (Exception e) {
-			log.error("HTTP 실패: {}", url, e);
-			return null;
-		}
-	}
+            if (body == null || body.isBlank()) return null;
+            return mapper().readValue(body, type);
+        } catch (Exception e) {
+            log.error("HTTP 실패: {}", url, e);
+            return null;
+        }
+    }
 
 
-	/* ===================== Mapping ===================== */
+    /* ===================== Mapping ===================== */
 
 	private Content mapToEntity(SearchFestivalResponse.Item item,
 		DetailCommonResponse common,
@@ -725,4 +721,28 @@ public class TourApiService {
 		boolean introFromOverview = false;
 		int infoLines = 0;
 	}
+
+    private List<String> collectTwoDistinctImages(SearchFestivalResponse.Item listItem, DetailCommonResponse common) {
+
+        List<String> urls = new ArrayList<>();
+
+        // ✅ firstimage MAN만 저장 (firstimage2 무시)
+        if (notBlank(listItem.getFirstimage())) {
+            urls.add(listItem.getFirstimage());
+        }
+
+        // detailCommon에서 firstimage만 (firstimage2 무시)
+        DetailCommonResponse.DetailItem d = firstDetailCommonItem(common);
+        if (urls.isEmpty() && d != null && notBlank(d.getFirstimage())) {
+            urls.add(d.getFirstimage());
+        }
+
+        return urls.stream()
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .distinct()
+                .limit(1)  // ✅ 최대 1장만!
+                .toList();
+    }
+
 }

@@ -33,17 +33,16 @@ public class ContentRegionRes {
     }
 
     private String extractGu(String address) {
-        String[] parts = address.split(" ");
-        StringBuilder sb = new StringBuilder();
-
-        for (String part : parts) {
-            sb.append(part).append(" ");
-            if (part.endsWith("구") || part.endsWith("군")) {
-                break;
-            }
+        if (address == null || address.isBlank()) {
+            return address;
         }
 
-        return sb.toString().trim();
+        String[] parts = address.split(" ");
+
+        if (parts.length >= 2) {
+            return parts[0] + " " + parts[1];
+        }
+        return address;
     }
 }
 
