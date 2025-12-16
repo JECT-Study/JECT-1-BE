@@ -14,9 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Repository;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.NumberExpression;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -63,13 +64,30 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     }
 
     private OrderSpecifier<?> getOrderSpecifier(String sort) {
-        switch (sort != null ? sort.toLowerCase() : "date") {  // 기본값 date
+        switch (sort != null ? sort.toLowerCase() : "date") {
             case "date":
-                return content.startDate.asc();  // ⭐ 임박 순 (가까운 날짜 먼저)
+                // endDate가 오늘 날짜에 가까운 순
+                NumberExpression<Integer> diff =
+                        Expressions.numberTemplate(
+                                Integer.class,
+                                "ABS(DATEDIFF({0}, CURDATE()))",
+                                content.endDate
+                        );
+
+                return diff.asc();
+
             case "views":
                 return content.views.desc();
+
             default:
-                return content.startDate.asc();  // 기본: 날짜 임박 순
+                NumberExpression<Integer> defaultDiff =
+                        Expressions.numberTemplate(
+                                Integer.class,
+                                "ABS(DATEDIFF({0}, CURDATE()))",
+                                content.endDate
+                        );
+
+                return defaultDiff.asc();
         }
     }
 
