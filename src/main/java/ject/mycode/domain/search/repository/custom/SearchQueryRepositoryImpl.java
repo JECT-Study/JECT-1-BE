@@ -64,11 +64,9 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
 
     private OrderSpecifier<?> getOrderSpecifier(String sort) {
         switch (sort != null ? sort.toLowerCase() : "date") {  // 기본값 date
-            case "views":
-                return content.views.desc();
             case "date":
                 return content.startDate.asc();  // ⭐ 임박 순 (가까운 날짜 먼저)
-            case "popular":
+            case "views":
                 return content.views.desc();
             default:
                 return content.startDate.asc();  // 기본: 날짜 임박 순
