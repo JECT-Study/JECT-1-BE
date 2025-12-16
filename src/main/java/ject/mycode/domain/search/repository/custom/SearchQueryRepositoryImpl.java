@@ -63,15 +63,15 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     }
 
     private OrderSpecifier<?> getOrderSpecifier(String sort) {
-        switch (sort != null ? sort.toLowerCase() : "") {
+        switch (sort != null ? sort.toLowerCase() : "date") {  // 기본값 date
             case "views":
                 return content.views.desc();
-            case "date":  // ⭐ 날짜 임박 순 (startDate ASC)
-                return content.startDate.asc();
-            case "enddate":  // 종료일 임박 순
-                return content.endDate.asc();
+            case "date":
+                return content.startDate.asc();  // ⭐ 임박 순 (가까운 날짜 먼저)
+            case "popular":
+                return content.views.desc();
             default:
-                return content.startDate.asc();  // 기본: 날짜순
+                return content.startDate.asc();  // 기본: 날짜 임박 순
         }
     }
 
@@ -173,9 +173,9 @@ public class SearchQueryRepositoryImpl implements SearchQueryRepository {
     }
 
     private BooleanExpression isUpcomingEvent() {
-        LocalDateTime now = LocalDateTime.now();
-        return content.startDate.goe(LocalDate.from(now))  // 시작일이 현재 이후
-                .or(content.endDate.goe(LocalDate.from(now))); // 종료일이 현재 이후
+        LocalDate now = LocalDate.now();
+        return content.startDate.goe(now)
+                .or(content.endDate.goe(now));
     }
 
 }
